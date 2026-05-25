@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { useId, useRef, useState } from "react";
+import { ImageUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +37,10 @@ export function BookForm({
   title,
   description,
 }: BookFormProps) {
+  const imageInputId = useId();
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImageName, setSelectedImageName] = useState<string>();
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
   const currentImageUrl = getBookImageUrl(book?.imageUrl);
 
   return (
@@ -100,23 +109,60 @@ export function BookForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              type="url"
-              defaultValue={book?.imageUrl}
-            />
-          </div>
+            <Label htmlFor={imageInputId}>Cover image</Label>
+            <label
+              htmlFor={imageInputId}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setIsDraggingImage(true);
+              }}
+              onDragLeave={() => setIsDraggingImage(false)}
+              onDrop={(event) => {
+                event.preventDefault();
+                setIsDraggingImage(false);
 
-          <div className="grid gap-2">
-            <Label htmlFor="image">Upload image</Label>
-            <Input id="image" name="image" type="file" accept="image/*" />
+                if (imageInputRef.current && event.dataTransfer.files.length) {
+                  imageInputRef.current.files = event.dataTransfer.files;
+                  setSelectedImageName(event.dataTransfer.files[0]?.name);
+                }
+              }}
+              className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed px-4 py-6 text-center transition-colors ${
+                isDraggingImage
+                  ? "border-primary bg-primary/5"
+                  : "hover:bg-muted/50"
+              }`}
+            >
+              <span className="bg-background flex size-10 items-center justify-center rounded-md border">
+                <ImageUp className="text-muted-foreground size-5" />
+              </span>
+              <span className="text-sm font-medium">
+                Drop an image here, or click to browse
+              </span>
+              <span className="text-muted-foreground text-xs">
+                JPG, PNG, WebP, or GIF up to 5 MB
+              </span>
+              {selectedImageName ? (
+                <span className="text-xs font-medium">{selectedImageName}</span>
+              ) : null}
+            </label>
+            <Input
+              ref={imageInputRef}
+              id={imageInputId}
+              name="image"
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(event) => {
+                setSelectedImageName(event.target.files?.[0]?.name);
+              }}
+            />
             {currentImageUrl ? (
               <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
-                <img
+                <Image
                   src={currentImageUrl}
                   alt={book?.title ? `${book.title} cover` : "Book cover"}
+                  width={64}
+                  height={64}
                   className="size-16 rounded-md border object-cover"
                 />
                 <div>

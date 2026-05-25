@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -116,9 +117,11 @@ export function BookDetailDialog({ book }: BookDetailDialogProps) {
       >
         <TableCell>
           {imageUrl ? (
-            <img
+            <Image
               src={imageUrl}
               alt={`${book.title} cover`}
+              width={48}
+              height={48}
               className="size-12 rounded-md border object-cover"
             />
           ) : (
@@ -180,9 +183,11 @@ export function BookDetailDialog({ book }: BookDetailDialogProps) {
             <div className="grid gap-5 sm:grid-cols-[160px_1fr]">
               <div className="bg-muted text-muted-foreground flex aspect-[3/4] items-center justify-center overflow-hidden rounded-md border text-sm">
                 {imageUrl ? (
-                  <img
+                  <Image
                     src={imageUrl}
                     alt={`${book.title} cover`}
+                    width={320}
+                    height={427}
                     className="h-full w-full object-cover"
                   />
                 ) : (
