@@ -17,6 +17,7 @@ type BookFormProps = {
   action: (formData: FormData) => void | Promise<void>;
   book?: Book;
   cancelHref?: string;
+  onCancel?: () => void;
   submitLabel: string;
   title: string;
   description: string;
@@ -26,6 +27,7 @@ export function BookForm({
   action,
   book,
   cancelHref = "/admin/books",
+  onCancel,
   submitLabel,
   title,
   description,
@@ -128,9 +130,15 @@ export function BookForm({
           </div>
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button variant="outline" asChild>
-              <Link href={cancelHref}>Cancel</Link>
-            </Button>
+            {onCancel ? (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            ) : (
+              <Button variant="outline" asChild>
+                <Link href={cancelHref}>Cancel</Link>
+              </Button>
+            )}
             <Button type="submit">{submitLabel}</Button>
           </div>
         </form>
