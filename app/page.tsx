@@ -4,17 +4,26 @@ import { TriangleAlert } from "lucide-react";
 import { StorefrontCatalog } from "@/components/storefront/storefront-catalog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getBooks, type Book } from "@/lib/books";
+import { getCategories, type Category } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   let books: Book[] = [];
+  let categories: Category[] = [];
   let loadError = false;
+  let categoryLoadError = false;
 
   try {
     books = await getBooks();
   } catch {
     loadError = true;
+  }
+
+  try {
+    categories = await getCategories();
+  } catch {
+    categoryLoadError = true;
   }
 
   return (
@@ -69,7 +78,26 @@ export default async function Home() {
           </Alert>
         ) : null}
 
-        <StorefrontCatalog books={books} />
+        {categoryLoadError ? (
+          <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950 dark:text-amber-200">
+            <div className="flex gap-3">
+              <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+              <div>
+                <AlertTitle>Categories API is unavailable</AlertTitle>
+                <AlertDescription className="text-amber-800 dark:text-amber-300">
+                  Books loaded, but categories could not be fetched.
+                </AlertDescription>
+              </div>
+            </div>
+          </Alert>
+        ) : null}
+
+        <StorefrontCatalog
+          books={books}
+          categories={categories.filter(
+            (category) => category.status === "active",
+          )}
+        />
       </div>
     </main>
   );

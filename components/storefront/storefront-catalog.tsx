@@ -8,28 +8,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Book } from "@/lib/books";
+import type { Category } from "@/lib/categories";
 
 type StorefrontCatalogProps = {
   books: Book[];
+  categories?: Category[];
 };
 
-export function StorefrontCatalog({ books }: StorefrontCatalogProps) {
+export function StorefrontCatalog({
+  books,
+  categories = [],
+}: StorefrontCatalogProps) {
   const [searchValue, setSearchValue] = useState("");
   const [query, setQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
 
   const filteredBooks = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    if (!normalizedQuery) {
-      return books;
-    }
-
     return books.filter((book) => {
-      return [book.title, book.author, book.description]
-        .filter(Boolean)
-        .some((value) => value?.toLowerCase().includes(normalizedQuery));
+      const matchesCategory =
+        !selectedCategoryId || book.categoryId === selectedCategoryId;
+      const matchesQuery =
+        !normalizedQuery ||
+        [book.title, book.author, book.description]
+          .filter(Boolean)
+          .some((value) => value?.toLowerCase().includes(normalizedQuery));
+
+      return matchesCategory && matchesQuery;
     });
-  }, [books, query]);
+  }, [books, query, selectedCategoryId]);
 
   return (
     <div className="grid gap-8">
@@ -74,6 +82,36 @@ export function StorefrontCatalog({ books }: StorefrontCatalogProps) {
         <p className="text-muted-foreground text-sm">
           Showing {filteredBooks.length} of {books.length} books
         </p>
+        {categories.length > 0 ? (
+          <div className="flex w-full flex-wrap items-center justify-start gap-2">
+            <span className="text-muted-foreground mr-1 text-sm font-medium">
+              Category:
+            </span>
+            <Button
+              type="button"
+              variant={selectedCategoryId ? "outline" : "default"}
+              size="sm"
+              onClick={() => setSelectedCategoryId("")}
+              className="h-7 rounded-full px-3 text-xs font-medium lowercase"
+            >
+              all
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                type="button"
+                variant={
+                  selectedCategoryId === category.id ? "default" : "outline"
+                }
+                size="sm"
+                onClick={() => setSelectedCategoryId(category.id)}
+                className="h-7 rounded-full px-3 text-xs font-medium lowercase"
+              >
+                {category.name}
+              </Button>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <section id="catalog" className="grid gap-4">
