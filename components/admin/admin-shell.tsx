@@ -52,16 +52,18 @@ export function AdminShell({ active, children }: AdminShellProps) {
           <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
             {adminNavItems.map((item) => {
               const Icon = item.icon;
+              const isActive = item.key === active;
 
               return (
                 <Link
                   key={item.key}
                   href={item.href}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
-                    item.key === active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    "flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-foreground",
+                    isActive
+                      ? "bg-gray-200 text-foreground"
+                      : "text-muted-foreground",
                   )}
                 >
                   <Icon className="size-4" />
