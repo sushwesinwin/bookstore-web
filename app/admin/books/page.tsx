@@ -1,10 +1,9 @@
-import Link from "next/link";
-import { Plus, TriangleAlert } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
+import { AddBookDialog } from "@/components/admin/add-book-dialog";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { BooksTable } from "@/components/admin/books-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { getBooks, type Book } from "@/lib/books";
 
 export const dynamic = "force-dynamic";
@@ -29,12 +28,7 @@ export default async function AdminBooksPage() {
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">Books</h1>
         </div>
 
-        <Button asChild>
-          <Link href="/admin/books/new">
-            <Plus />
-            Add book
-          </Link>
-        </Button>
+        <AddBookDialog />
       </header>
 
       {loadError ? (
