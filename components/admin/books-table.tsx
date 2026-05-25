@@ -146,7 +146,7 @@ export function BooksTable({ books }: BooksTableProps) {
                       {formatDate(book.updatedAt)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <BookActions bookId={book.id} />
+                      <BookActions book={book} />
                     </TableCell>
                   </TableRow>
                 );

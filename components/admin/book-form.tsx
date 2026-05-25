@@ -16,6 +16,7 @@ import { getBookImageUrl, type Book } from "@/lib/books";
 type BookFormProps = {
   action: (formData: FormData) => void | Promise<void>;
   book?: Book;
+  cancelHref?: string;
   submitLabel: string;
   title: string;
   description: string;
@@ -24,6 +25,7 @@ type BookFormProps = {
 export function BookForm({
   action,
   book,
+  cancelHref = "/admin/books",
   submitLabel,
   title,
   description,
@@ -127,7 +129,7 @@ export function BookForm({
 
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="outline" asChild>
-              <Link href="/admin/books">Cancel</Link>
+              <Link href={cancelHref}>Cancel</Link>
             </Button>
             <Button type="submit">{submitLabel}</Button>
           </div>
