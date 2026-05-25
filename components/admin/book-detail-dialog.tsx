@@ -142,7 +142,12 @@ export function BookDetailDialog({ book }: BookDetailDialogProps) {
         </TableCell>
         <TableCell className="text-muted-foreground">{book.author}</TableCell>
         <TableCell>
-          <Badge variant={inventory.variant}>{inventory.label}</Badge>
+          <div className="flex flex-wrap gap-1">
+            <Badge variant={inventory.variant}>{inventory.label}</Badge>
+            {book.isBestSeller ? (
+              <Badge variant="secondary">Best seller</Badge>
+            ) : null}
+          </div>
         </TableCell>
         <TableCell className="text-right font-medium">
           {formatCurrency(book.price)}
@@ -220,9 +225,19 @@ export function BookDetailDialog({ book }: BookDetailDialogProps) {
 
                 <div>
                   <p className="text-muted-foreground text-sm">Status</p>
-                  <Badge className="mt-1" variant={inventory.variant}>
-                    {inventory.label}
-                  </Badge>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <Badge variant={inventory.variant}>{inventory.label}</Badge>
+                    {book.isBestSeller ? (
+                      <Badge variant="secondary">Best seller</Badge>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-muted-foreground text-sm">Best seller</p>
+                  <p className="mt-1 text-sm font-medium">
+                    {book.isBestSeller ? "Yes" : "No"}
+                  </p>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">

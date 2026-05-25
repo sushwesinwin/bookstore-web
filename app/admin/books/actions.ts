@@ -22,6 +22,7 @@ async function parseBookForm(formData: FormData): Promise<CreateBookInput> {
   const author = optionalString(formData.get("author"));
   const price = Number(formData.get("price"));
   const stock = Number(formData.get("stock") ?? 0);
+  const isBestSeller = formData.get("isBestSeller") === "true";
   const image = formData.get("image");
   const uploadedImageUrl =
     image instanceof File && image.size > 0
@@ -39,6 +40,7 @@ async function parseBookForm(formData: FormData): Promise<CreateBookInput> {
     price,
     stock: Number.isNaN(stock) ? 0 : stock,
     imageUrl: uploadedImageUrl,
+    isBestSeller,
   };
 }
 

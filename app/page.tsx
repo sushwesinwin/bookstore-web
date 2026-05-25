@@ -1,5 +1,106 @@
-import { redirect } from "next/navigation";
+import Link from "next/link";
+import { TriangleAlert } from "lucide-react";
+
+import { BookCatalog } from "@/components/storefront/book-catalog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { getBooks, type Book } from "@/lib/books";
+
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  redirect("/admin");
+  let books: Book[] = [];
+  let loadError = false;
+
+  try {
+    books = await getBooks();
+  } catch {
+    loadError = true;
+  }
+
+  const bestSellers = books.filter((book) => book.isBestSeller);
+
+  return (
+    <main className="min-h-screen bg-background">
+      <nav className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="text-lg font-semibold tracking-tight">
+            Bookstore
+          </Link>
+          <div className="flex items-center gap-6 text-sm font-medium">
+            <Link className="text-foreground" href="/">
+              Books
+            </Link>
+            <Link className="text-muted-foreground hover:text-foreground" href="#new">
+              New arrivals
+            </Link>
+            <Link
+              className="text-muted-foreground hover:text-foreground"
+              href="#catalog"
+            >
+              Catalog
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+        <header id="new" className="grid gap-3 border-b pb-8">
+          <p className="text-muted-foreground text-sm font-medium">
+            Curated shelves
+          </p>
+          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight">
+            Find your next read from our latest collection.
+          </h1>
+          <p className="text-muted-foreground max-w-2xl">
+            Search the catalog by title, author, or keyword and browse books
+            currently managed by the store.
+          </p>
+        </header>
+
+        {loadError ? (
+          <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950 dark:text-amber-200">
+            <div className="flex gap-3">
+              <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+              <div>
+                <AlertTitle>Books API is unavailable</AlertTitle>
+                <AlertDescription className="text-amber-800 dark:text-amber-300">
+                  The bookstore loaded, but books could not be fetched.
+                </AlertDescription>
+              </div>
+            </div>
+          </Alert>
+        ) : null}
+
+        {bestSellers.length > 0 ? (
+          <section className="grid gap-4">
+            <div>
+              <p className="text-muted-foreground text-sm font-medium">
+                Reader favorites
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+                Best sellers
+              </h2>
+            </div>
+            <BookCatalog
+              books={bestSellers}
+              showSearch={false}
+              showCount={false}
+            />
+          </section>
+        ) : null}
+
+        <section id="catalog" className="grid gap-4">
+          <div>
+            <p className="text-muted-foreground text-sm font-medium">
+              Full catalog
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+              All books
+            </h2>
+          </div>
+          <BookCatalog books={books} />
+        </section>
+      </div>
+    </main>
+  );
 }

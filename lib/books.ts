@@ -10,6 +10,7 @@ export type Book = {
     price: string;
     stock: number;
     imageUrl?: string;
+    isBestSeller: boolean;
     createdAt: string;
     updatedAt: string;
 };
@@ -21,6 +22,7 @@ export type CreateBookInput = {
     price: number;
     stock?: number;
     imageUrl?: string;
+    isBestSeller?: boolean;
 };
 
 export type UpdateBookInput = CreateBookInput;

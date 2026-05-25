@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { getBookImageUrl, type Book } from "@/lib/books";
 
@@ -106,6 +107,21 @@ export function BookForm({
                 defaultValue={book?.stock ?? 0}
               />
             </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 rounded-md border bg-muted/30 p-4">
+            <div className="grid gap-1">
+              <Label htmlFor="isBestSeller">Best seller</Label>
+              <p className="text-muted-foreground text-sm">
+                Feature this book in the public best-seller section.
+              </p>
+            </div>
+            <Switch
+              id="isBestSeller"
+              name="isBestSeller"
+              value="true"
+              defaultChecked={book?.isBestSeller ?? false}
+            />
           </div>
 
           <div className="grid gap-2">
