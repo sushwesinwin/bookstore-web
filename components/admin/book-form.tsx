@@ -15,13 +15,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { getBookImageUrl, type Book } from "@/lib/books";
+import type { Category } from "@/lib/categories";
 
 type BookFormProps = {
   action: (formData: FormData) => void | Promise<void>;
   book?: Book;
+  categories?: Category[];
   cancelHref?: string;
   onCancel?: () => void;
   submitLabel: string;
@@ -32,6 +35,7 @@ type BookFormProps = {
 export function BookForm({
   action,
   book,
+  categories = [],
   cancelHref = "/admin/books",
   onCancel,
   submitLabel,
@@ -70,6 +74,24 @@ export function BookForm({
               defaultValue={book?.author}
               required
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="categoryId">Category</Label>
+            <Select
+              id="categoryId"
+              name="categoryId"
+              defaultValue={book?.categoryId ?? ""}
+              className="h-11"
+            >
+              <option value="">Uncategorized</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                  {category.status === "inactive" ? " (inactive)" : ""}
+                </option>
+              ))}
+            </Select>
           </div>
 
           <div className="grid gap-2">

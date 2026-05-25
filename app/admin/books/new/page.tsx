@@ -1,8 +1,11 @@
 import { AdminShell } from "@/components/admin/admin-shell";
 import { BookForm } from "@/components/admin/book-form";
 import { createBookAction } from "@/app/admin/books/actions";
+import { getCategories } from "@/lib/categories";
 
-export default function NewBookPage() {
+export default async function NewBookPage() {
+  const categories = await getCategories();
+
   return (
     <AdminShell active="books">
       <header className="border-b pb-6">
@@ -16,6 +19,7 @@ export default function NewBookPage() {
 
       <BookForm
         action={createBookAction}
+        categories={categories}
         title="Book details"
         description="Create a new catalog record."
         submitLabel="Create book"

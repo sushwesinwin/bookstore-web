@@ -13,8 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { Category } from "@/lib/categories";
 
-export function AddBookDialog() {
+type AddBookDialogProps = {
+  categories: Category[];
+};
+
+export function AddBookDialog({ categories }: AddBookDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -31,6 +36,7 @@ export function AddBookDialog() {
         </DialogHeader>
         <BookForm
           action={createBookAction}
+          categories={categories}
           onCancel={() => setIsOpen(false)}
           title="Book details"
           description="Add catalog, pricing, inventory, and image details."

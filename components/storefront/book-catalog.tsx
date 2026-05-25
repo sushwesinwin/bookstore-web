@@ -68,20 +68,28 @@ export function BookCatalog({
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {filteredBooks.map((book) => {
+          {filteredBooks.map((book, index) => {
             const imageUrl = getBookImageUrl(book.imageUrl);
+            const isFirstImage = index === 0;
 
             return (
               <Card
                 key={book.id}
-                className="group overflow-hidden border-0 bg-transparent py-0 shadow-none"
+                className="group relative overflow-visible border-0 bg-transparent py-0 shadow-none"
               >
+                {book.isBestSeller ? (
+                  <Badge className="absolute -top-2 -left-2 z-10 border-transparent bg-red-600 text-white shadow-sm hover:bg-red-600">
+                    Best seller
+                  </Badge>
+                ) : null}
                 <div className="bg-muted relative aspect-[3/4] overflow-hidden rounded-md border shadow-xs transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-lg">
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
                       alt={`${book.title} cover`}
                       fill
+                      priority={isFirstImage}
+                      loading={isFirstImage ? "eager" : "lazy"}
                       sizes="(min-width: 1280px) 16vw, (min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
@@ -90,11 +98,6 @@ export function BookCatalog({
                       No cover
                     </div>
                   )}
-                  {book.isBestSeller ? (
-                    <Badge className="absolute top-2 left-2" variant="secondary">
-                      Best seller
-                    </Badge>
-                  ) : null}
                 </div>
                 <CardContent className="px-1 pt-2 pb-0">
                   <h2 className="text-xs leading-4 font-medium transition-colors group-hover:text-foreground">

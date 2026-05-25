@@ -40,6 +40,7 @@ async function parseBookForm(formData: FormData): Promise<CreateBookInput> {
     price,
     stock: Number.isNaN(stock) ? 0 : stock,
     imageUrl: uploadedImageUrl,
+    categoryId: optionalString(formData.get("categoryId")) ?? null,
     isBestSeller,
   };
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
 
-import { BookCatalog } from "@/components/storefront/book-catalog";
+import { StorefrontCatalog } from "@/components/storefront/storefront-catalog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getBooks, type Book } from "@/lib/books";
 
@@ -16,8 +16,6 @@ export default async function Home() {
   } catch {
     loadError = true;
   }
-
-  const bestSellers = books.filter((book) => book.isBestSeller);
 
   return (
     <main className="min-h-screen bg-background">
@@ -44,7 +42,7 @@ export default async function Home() {
       </nav>
 
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
-        <header id="new" className="grid gap-3 border-b pb-8">
+        <header id="new" className="grid gap-3 pb-2">
           <p className="text-muted-foreground text-sm font-medium">
             Curated shelves
           </p>
@@ -71,35 +69,7 @@ export default async function Home() {
           </Alert>
         ) : null}
 
-        {bestSellers.length > 0 ? (
-          <section className="grid gap-4">
-            <div>
-              <p className="text-muted-foreground text-sm font-medium">
-                Reader favorites
-              </p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-                Best sellers
-              </h2>
-            </div>
-            <BookCatalog
-              books={bestSellers}
-              showSearch={false}
-              showCount={false}
-            />
-          </section>
-        ) : null}
-
-        <section id="catalog" className="grid gap-4">
-          <div>
-            <p className="text-muted-foreground text-sm font-medium">
-              Full catalog
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-              All books
-            </h2>
-          </div>
-          <BookCatalog books={books} />
-        </section>
+        <StorefrontCatalog books={books} />
       </div>
     </main>
   );

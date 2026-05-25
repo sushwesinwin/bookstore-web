@@ -20,9 +20,11 @@ import {
 } from "@/components/ui/dialog";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getBookImageUrl, type Book } from "@/lib/books";
+import type { Category } from "@/lib/categories";
 
 type BookDetailDialogProps = {
   book: Book;
+  categories: Category[];
 };
 
 function formatCurrency(value: string) {
@@ -77,7 +79,7 @@ function getInventoryState(stock: number) {
   return { label: "In stock", variant: "success" as const };
 }
 
-export function BookDetailDialog({ book }: BookDetailDialogProps) {
+export function BookDetailDialog({ book, categories }: BookDetailDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [mode, setMode] = useState<"detail" | "edit">("detail");
@@ -142,6 +144,13 @@ export function BookDetailDialog({ book }: BookDetailDialogProps) {
         </TableCell>
         <TableCell className="text-muted-foreground">{book.author}</TableCell>
         <TableCell>
+          {book.category ? (
+            <Badge variant="outline">{book.category.name}</Badge>
+          ) : (
+            <span className="text-muted-foreground text-sm">Uncategorized</span>
+          )}
+        </TableCell>
+        <TableCell>
           <div className="flex flex-wrap gap-1">
             <Badge variant={inventory.variant}>{inventory.label}</Badge>
             {book.isBestSeller ? (
@@ -172,6 +181,7 @@ export function BookDetailDialog({ book }: BookDetailDialogProps) {
             <BookForm
               action={updateAction}
               book={book}
+              categories={categories}
               onCancel={() => setMode("detail")}
               title="Book details"
               description="Changes are saved to the catalog."
@@ -221,6 +231,13 @@ export function BookDetailDialog({ book }: BookDetailDialogProps) {
                       {book.stock.toLocaleString("en-US")}
                     </p>
                   </div>
+                </div>
+
+                <div>
+                  <p className="text-muted-foreground text-sm">Category</p>
+                  <p className="mt-1 text-sm font-medium">
+                    {book.category?.name || "Uncategorized"}
+                  </p>
                 </div>
 
                 <div>

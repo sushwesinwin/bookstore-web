@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { Category } from './categories';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,6 +11,8 @@ export type Book = {
     price: string;
     stock: number;
     imageUrl?: string;
+    categoryId?: string | null;
+    category?: Category | null;
     isBestSeller: boolean;
     createdAt: string;
     updatedAt: string;
@@ -22,6 +25,7 @@ export type CreateBookInput = {
     price: number;
     stock?: number;
     imageUrl?: string;
+    categoryId?: string | null;
     isBestSeller?: boolean;
 };
 
