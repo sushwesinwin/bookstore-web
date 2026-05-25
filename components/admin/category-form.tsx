@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useRef, useState } from "react";
+import { type FormEvent, useId, useRef, useState, useTransition } from "react";
 import { ImageUp } from "lucide-react";
 
+import type { CategoryActionResult } from "@/app/admin/categories/actions";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { getCategoryImageUrl, type Category } from "@/lib/categories";
 
 type CategoryFormProps = {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => Promise<CategoryActionResult>;
   category?: Category;
   onCancel?: () => void;
   submitLabel: string;
@@ -27,10 +29,37 @@ export function CategoryForm({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [selectedImageName, setSelectedImageName] = useState<string>();
   const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [error, setError] = useState<string>();
+  const [isPending, startTransition] = useTransition();
   const currentImageUrl = getCategoryImageUrl(category?.imageUrl);
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    startTransition(async () => {
+      setError(undefined);
+
+      const result = await action(formData);
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
+      onCancel?.();
+    });
+  }
+
   return (
-    <form action={action} className="grid gap-5">
+    <form onSubmit={handleSubmit} className="grid gap-5">
+      {error ? (
+        <Alert className="border-red-200 bg-red-50 text-red-900">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       <div className="grid gap-2">
         <Label htmlFor="name">Name</Label>
         <Input
@@ -88,7 +117,7 @@ export function CategoryForm({
             Drop an image here, or click to browse
           </span>
           <span className="text-muted-foreground text-xs">
-            JPG, PNG, WebP, or GIF up to 5 MB
+            JPG, PNG, WebP, GIF, or SVG up to 5 MB
           </span>
           {selectedImageName ? (
             <span className="text-xs font-medium">{selectedImageName}</span>
@@ -99,7 +128,7 @@ export function CategoryForm({
           id={imageInputId}
           name="image"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg"
           className="sr-only"
           onChange={(event) => {
             setSelectedImageName(event.target.files?.[0]?.name);
@@ -130,7 +159,9 @@ export function CategoryForm({
             Cancel
           </Button>
         ) : null}
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" disabled={isPending}>
+          {submitLabel}
+        </Button>
       </div>
     </form>
   );

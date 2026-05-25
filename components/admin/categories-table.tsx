@@ -7,7 +7,6 @@ import { Pencil, Trash2 } from "lucide-react";
 import {
   deleteCategoryAction,
   updateCategoryAction,
-  updateCategoryStatusAction,
 } from "@/app/admin/categories/actions";
 import { CategoryForm } from "@/components/admin/category-form";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +25,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -68,18 +66,17 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-16">Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Image</TableHead>
               <TableHead>Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {categories.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={4}
                   className="text-muted-foreground h-24 text-center"
                 >
                   No categories found.
@@ -98,48 +95,42 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
 }
 
 function CategoryRow({ category }: { category: Category }) {
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [mode, setMode] = useState<"detail" | "edit">("detail");
   const [isPending, startTransition] = useTransition();
   const updateAction = updateCategoryAction.bind(null, category.id);
-  const nextStatus = category.status === "active" ? "inactive" : "active";
   const imageUrl = getCategoryImageUrl(category.imageUrl);
 
-  function handleStatusChange() {
-    const formData = new FormData();
-    formData.set("status", nextStatus);
+  function handleOpenChange(open: boolean) {
+    setIsOpen(open);
 
-    startTransition(async () => {
-      await updateCategoryStatusAction(category.id, formData);
-    });
+    if (!open) {
+      setMode("detail");
+    }
   }
 
   function handleDelete() {
     startTransition(async () => {
       await deleteCategoryAction(category.id);
       setIsDeleteOpen(false);
+      setIsOpen(false);
     });
   }
 
   return (
-    <>
-      <TableRow>
-        <TableCell className="font-medium">{category.name}</TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={category.status === "active"}
-              disabled={isPending}
-              aria-label={`Set ${category.name} status`}
-              onCheckedChange={handleStatusChange}
-            />
-            <Badge
-              variant={category.status === "active" ? "success" : "secondary"}
-            >
-              {category.status}
-            </Badge>
-          </div>
-        </TableCell>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <TableRow
+        className="cursor-pointer"
+        tabIndex={0}
+        onClick={() => setIsOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setIsOpen(true);
+          }
+        }}
+      >
         <TableCell>
           {imageUrl ? (
             <Image
@@ -155,50 +146,120 @@ function CategoryRow({ category }: { category: Category }) {
             </div>
           )}
         </TableCell>
+        <TableCell className="font-medium">{category.name}</TableCell>
+        <TableCell>
+          <Badge
+            variant={category.status === "active" ? "success" : "secondary"}
+          >
+            {category.status}
+          </Badge>
+        </TableCell>
         <TableCell className="text-muted-foreground">
           {formatDate(category.updatedAt)}
         </TableCell>
-        <TableCell>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditOpen(true)}
-            >
-              <Pencil />
-              Edit
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              disabled={isPending}
-              onClick={() => setIsDeleteOpen(true)}
-            >
-              <Trash2 />
-              Delete
-            </Button>
-          </div>
-        </TableCell>
       </TableRow>
 
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Edit category</DialogTitle>
-            <DialogDescription>
-              Update the category name, image, and status.
-            </DialogDescription>
-          </DialogHeader>
-          <CategoryForm
-            action={updateAction}
-            category={category}
-            onCancel={() => setIsEditOpen(false)}
-            submitLabel="Save changes"
-          />
-        </DialogContent>
-      </Dialog>
+      <DialogContent className={mode === "edit" ? "max-w-xl" : "max-w-2xl"}>
+        {mode === "edit" ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Edit category</DialogTitle>
+              <DialogDescription>
+                Update the category name, image, and status.
+              </DialogDescription>
+            </DialogHeader>
+            <CategoryForm
+              action={updateAction}
+              category={category}
+              onCancel={() => setMode("detail")}
+              submitLabel="Save changes"
+            />
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>{category.name}</DialogTitle>
+              <DialogDescription>Category details</DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-5 sm:grid-cols-[160px_1fr]">
+              <div className="bg-muted text-muted-foreground flex aspect-square items-center justify-center overflow-hidden rounded-md border text-sm">
+                {imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt={`${category.name} category`}
+                    width={320}
+                    height={320}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  "No image"
+                )}
+              </div>
+
+              <div className="grid gap-4">
+                <div>
+                  <p className="text-muted-foreground text-sm">Name</p>
+                  <p className="mt-1 text-sm font-medium">{category.name}</p>
+                </div>
+
+                <div>
+                  <p className="text-muted-foreground text-sm">Status</p>
+                  <div className="mt-1">
+                    <Badge
+                      variant={
+                        category.status === "active" ? "success" : "secondary"
+                      }
+                    >
+                      {category.status}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-muted-foreground text-sm">Image URL</p>
+                  <p className="text-muted-foreground mt-1 max-w-md truncate text-sm">
+                    {category.imageUrl || "No image"}
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <p className="text-muted-foreground text-sm">Created</p>
+                    <p className="mt-1 text-sm">
+                      {formatDate(category.createdAt)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-sm">Updated</p>
+                    <p className="mt-1 text-sm">
+                      {formatDate(category.updatedAt)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+              <Button variant="outline" onClick={() => setIsOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="outline" onClick={() => setMode("edit")}>
+                <Pencil />
+                Edit
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                <Trash2 />
+                Delete
+              </Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
 
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent className="max-w-md">
@@ -227,6 +288,6 @@ function CategoryRow({ category }: { category: Category }) {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </Dialog>
   );
 }
