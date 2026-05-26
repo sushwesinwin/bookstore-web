@@ -15,7 +15,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { getBookImageUrl, type Book } from "@/lib/books";
@@ -43,9 +49,13 @@ export function BookForm({
   description,
 }: BookFormProps) {
   const imageInputId = useId();
+  const categoryInputId = useId();
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [selectedImageName, setSelectedImageName] = useState<string>();
   const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    book?.categoryId ?? "uncategorized",
+  );
   const currentImageUrl = getBookImageUrl(book?.imageUrl);
 
   return (
@@ -77,20 +87,32 @@ export function BookForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="categoryId">Category</Label>
-            <Select
-              id="categoryId"
+            <Label htmlFor={categoryInputId}>Category</Label>
+            <input
+              type="hidden"
               name="categoryId"
-              defaultValue={book?.categoryId ?? ""}
-              className="h-11"
+              value={
+                selectedCategoryId === "uncategorized"
+                  ? ""
+                  : selectedCategoryId
+              }
+            />
+            <Select
+              value={selectedCategoryId}
+              onValueChange={setSelectedCategoryId}
             >
-              <option value="">Uncategorized</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                  {category.status === "inactive" ? " (inactive)" : ""}
-                </option>
-              ))}
+              <SelectTrigger id={categoryInputId} className="h-11">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="uncategorized">Uncategorized</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                    {category.status === "inactive" ? " (inactive)" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
 

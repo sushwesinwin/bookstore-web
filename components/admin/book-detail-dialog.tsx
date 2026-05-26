@@ -25,7 +25,20 @@ import type { Category } from "@/lib/categories";
 type BookDetailDialogProps = {
   book: Book;
   categories: Category[];
+  visibleColumns?: BookTableColumnVisibility;
 };
+
+export type BookTableColumn =
+  | "cover"
+  | "title"
+  | "author"
+  | "category"
+  | "status"
+  | "price"
+  | "stock"
+  | "updated";
+
+export type BookTableColumnVisibility = Record<BookTableColumn, boolean>;
 
 function formatCurrency(value: string) {
   const amount = Number(value);
@@ -79,7 +92,20 @@ function getInventoryState(stock: number) {
   return { label: "In stock", variant: "success" as const };
 }
 
-export function BookDetailDialog({ book, categories }: BookDetailDialogProps) {
+export function BookDetailDialog({
+  book,
+  categories,
+  visibleColumns = {
+    cover: true,
+    title: true,
+    author: true,
+    category: true,
+    status: true,
+    price: true,
+    stock: true,
+    updated: true,
+  },
+}: BookDetailDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [mode, setMode] = useState<"detail" | "edit">("detail");
@@ -117,56 +143,74 @@ export function BookDetailDialog({ book, categories }: BookDetailDialogProps) {
           }
         }}
       >
-        <TableCell>
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={`${book.title} cover`}
-              width={48}
-              height={48}
-              className="size-12 rounded-md border object-cover"
-            />
-          ) : (
-            <div className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-md border text-xs">
-              No image
+        {visibleColumns.cover ? (
+          <TableCell>
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={`${book.title} cover`}
+                width={48}
+                height={48}
+                className="size-12 rounded-md border object-cover"
+              />
+            ) : (
+              <div className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-md border text-xs">
+                No image
+              </div>
+            )}
+          </TableCell>
+        ) : null}
+        {visibleColumns.title ? (
+          <TableCell>
+            <div className="max-w-80">
+              <p className="truncate font-medium">{book.title}</p>
+              {book.description ? (
+                <p className="text-muted-foreground mt-1 truncate text-xs">
+                  {book.description}
+                </p>
+              ) : null}
             </div>
-          )}
-        </TableCell>
-        <TableCell>
-          <div className="max-w-80">
-            <p className="truncate font-medium">{book.title}</p>
-            {book.description ? (
-              <p className="text-muted-foreground mt-1 truncate text-xs">
-                {book.description}
-              </p>
-            ) : null}
-          </div>
-        </TableCell>
-        <TableCell className="text-muted-foreground">{book.author}</TableCell>
-        <TableCell>
-          {book.category ? (
-            <Badge variant="outline">{book.category.name}</Badge>
-          ) : (
-            <span className="text-muted-foreground text-sm">Uncategorized</span>
-          )}
-        </TableCell>
-        <TableCell>
-          <div className="flex flex-wrap gap-1">
-            <Badge variant={inventory.variant}>{inventory.label}</Badge>
-            {book.isBestSeller ? (
-              <Badge variant="secondary">Best seller</Badge>
-            ) : null}
-          </div>
-        </TableCell>
-        <TableCell className="text-right font-medium">
-          {formatCurrency(book.price)}
-        </TableCell>
-        <TableCell className="text-right">
-          {book.stock.toLocaleString("en-US")}
-        </TableCell>
-        <TableCell className="text-muted-foreground">
-          {formatShortDate(book.updatedAt)}
-        </TableCell>
+          </TableCell>
+        ) : null}
+        {visibleColumns.author ? (
+          <TableCell className="text-muted-foreground">{book.author}</TableCell>
+        ) : null}
+        {visibleColumns.category ? (
+          <TableCell>
+            {book.category ? (
+              <Badge variant="outline">{book.category.name}</Badge>
+            ) : (
+              <span className="text-muted-foreground text-sm">
+                Uncategorized
+              </span>
+            )}
+          </TableCell>
+        ) : null}
+        {visibleColumns.status ? (
+          <TableCell>
+            <div className="flex flex-wrap gap-1">
+              <Badge variant={inventory.variant}>{inventory.label}</Badge>
+              {book.isBestSeller ? (
+                <Badge variant="secondary">Best seller</Badge>
+              ) : null}
+            </div>
+          </TableCell>
+        ) : null}
+        {visibleColumns.price ? (
+          <TableCell className="text-right font-medium">
+            {formatCurrency(book.price)}
+          </TableCell>
+        ) : null}
+        {visibleColumns.stock ? (
+          <TableCell className="text-right">
+            {book.stock.toLocaleString("en-US")}
+          </TableCell>
+        ) : null}
+        {visibleColumns.updated ? (
+          <TableCell className="text-muted-foreground">
+            {formatShortDate(book.updatedAt)}
+          </TableCell>
+        ) : null}
       </TableRow>
 
       <DialogContent className={mode === "edit" ? "max-w-3xl" : "max-w-2xl"}>
