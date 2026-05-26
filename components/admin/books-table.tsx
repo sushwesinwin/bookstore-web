@@ -19,6 +19,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Pagination,
+  PaginationButton,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -44,6 +53,8 @@ type BooksTableProps = {
 
 type StockFilter = "all" | "in_stock" | "low_stock" | "out_of_stock";
 type SellerFilter = "all" | "best_seller" | "regular";
+
+const pageSizeOptions = [5, 10, 20, 50];
 
 const tableColumns: Array<{
   key: BookTableColumn;
@@ -79,6 +90,8 @@ export function BooksTable({ books, categories }: BooksTableProps) {
   const [sellerFilter, setSellerFilter] = useState<SellerFilter>("all");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [columnVisibility, setColumnVisibility] =
     useState<BookTableColumnVisibility>(defaultColumnVisibility);
 
@@ -127,6 +140,16 @@ export function BooksTable({ books, categories }: BooksTableProps) {
   const isDefaultColumnVisibility = tableColumns.every(
     (column) => columnVisibility[column.key] === defaultColumnVisibility[column.key],
   );
+  const totalPages = Math.max(Math.ceil(filteredBooks.length / pageSize), 1);
+  const visiblePage = Math.min(currentPage, totalPages);
+  const pageStartIndex = (visiblePage - 1) * pageSize;
+  const paginatedBooks = filteredBooks.slice(
+    pageStartIndex,
+    pageStartIndex + pageSize,
+  );
+  const resultStart = filteredBooks.length === 0 ? 0 : pageStartIndex + 1;
+  const resultEnd = Math.min(pageStartIndex + pageSize, filteredBooks.length);
+  const paginationItems = getPaginationItems(totalPages, visiblePage);
 
   function setColumn(key: BookTableColumn, checked: boolean) {
     setColumnVisibility((current) => ({
@@ -146,11 +169,13 @@ export function BooksTable({ books, categories }: BooksTableProps) {
     setSelectedCategoryId("all");
     setStockFilter("all");
     setSellerFilter("all");
+    setCurrentPage(1);
   }
 
   function closeSearch() {
     setQuery("");
     setIsSearchOpen(false);
+    setCurrentPage(1);
   }
 
   return (
@@ -174,7 +199,10 @@ export function BooksTable({ books, categories }: BooksTableProps) {
                   id="admin-book-search"
                   value={query}
                   autoFocus
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   onKeyDown={(event) => {
                     if (event.key === "Escape") {
                       closeSearch();
@@ -216,7 +244,10 @@ export function BooksTable({ books, categories }: BooksTableProps) {
               </Label>
               <Select
                 value={selectedCategoryId}
-                onValueChange={setSelectedCategoryId}
+                onValueChange={(value) => {
+                  setSelectedCategoryId(value);
+                  setCurrentPage(1);
+                }}
               >
                 <SelectTrigger
                   id="admin-book-category-filter"
@@ -242,7 +273,10 @@ export function BooksTable({ books, categories }: BooksTableProps) {
               </Label>
               <Select
                 value={stockFilter}
-                onValueChange={(value) => setStockFilter(value as StockFilter)}
+                onValueChange={(value) => {
+                  setStockFilter(value as StockFilter);
+                  setCurrentPage(1);
+                }}
               >
                 <SelectTrigger
                   id="admin-book-stock-filter"
@@ -265,9 +299,10 @@ export function BooksTable({ books, categories }: BooksTableProps) {
               </Label>
               <Select
                 value={sellerFilter}
-                onValueChange={(value) =>
-                  setSellerFilter(value as SellerFilter)
-                }
+                onValueChange={(value) => {
+                  setSellerFilter(value as SellerFilter);
+                  setCurrentPage(1);
+                }}
               >
                 <SelectTrigger
                   id="admin-book-seller-filter"
@@ -342,7 +377,7 @@ export function BooksTable({ books, categories }: BooksTableProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredBooks.map((book) => (
+              paginatedBooks.map((book) => (
                 <BookDetailDialog
                   key={book.id}
                   book={book}
@@ -354,6 +389,79 @@ export function BooksTable({ books, categories }: BooksTableProps) {
           </TableBody>
         </Table>
       </div>
+
+      {filteredBooks.length > 0 ? (
+        <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-1 rounded-full bg-muted/40 p-1">
+            <p className="text-muted-foreground px-2 text-xs">
+              {resultStart}-{resultEnd} of {filteredBooks.length}
+            </p>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground text-xs">Show</span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="h-8 w-20 rounded-full border bg-background px-3 text-xs shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageSizeOptions.map((option) => (
+                    <SelectItem key={option} value={String(option)}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Pagination className="mx-0 w-auto justify-start rounded-full bg-muted/40 p-1 sm:justify-end">
+            <PaginationContent className="gap-0.5">
+              <PaginationItem>
+                <PaginationPrevious
+                  type="button"
+                  className="rounded-full"
+                  disabled={visiblePage === 1}
+                  onClick={() =>
+                    setCurrentPage((page) => Math.max(page - 1, 1))
+                  }
+                />
+              </PaginationItem>
+              {paginationItems.map((item, index) => (
+                <PaginationItem key={`${item}-${index}`}>
+                  {item === "ellipsis" ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationButton
+                      type="button"
+                      isActive={item === visiblePage}
+                      className="rounded-full"
+                      aria-label={`Go to page ${item}`}
+                      aria-current={item === visiblePage ? "page" : undefined}
+                      onClick={() => setCurrentPage(item)}
+                    >
+                      {item}
+                    </PaginationButton>
+                  )}
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  type="button"
+                  className="rounded-full"
+                  disabled={visiblePage === totalPages}
+                  onClick={() =>
+                    setCurrentPage((page) => Math.min(page + 1, totalPages))
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      ) : null}
 
       <Dialog open={isConfigureOpen} onOpenChange={setIsConfigureOpen}>
         <DialogContent className="max-w-sm gap-3 p-5">
@@ -409,4 +517,35 @@ export function BooksTable({ books, categories }: BooksTableProps) {
       </Dialog>
     </div>
   );
+}
+
+function getPaginationItems(totalPages: number, currentPage: number) {
+  if (totalPages <= 5) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, "ellipsis", totalPages] as const;
+  }
+
+  if (currentPage >= totalPages - 2) {
+    return [
+      1,
+      "ellipsis",
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ] as const;
+  }
+
+  return [
+    1,
+    "ellipsis",
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    "ellipsis",
+    totalPages,
+  ] as const;
 }
