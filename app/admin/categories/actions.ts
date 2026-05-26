@@ -7,7 +7,6 @@ import {
   deleteCategory,
   updateCategory,
   updateCategoryStatus,
-  uploadCategoryImage,
   type CategoryStatus,
   type CreateCategoryInput,
 } from "@/lib/categories";
@@ -64,15 +63,8 @@ async function parseCategoryForm(
     throw new Error("Category name is required.");
   }
 
-  const image = formData.get("image");
-  const uploadedImageUrl =
-    image instanceof File && image.size > 0
-      ? await uploadCategoryImage(image)
-      : undefined;
-
   return {
     name,
-    imageUrl: uploadedImageUrl,
     status: parseStatus(formData),
   };
 }

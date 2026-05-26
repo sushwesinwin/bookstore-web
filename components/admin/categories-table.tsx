@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useTransition } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -33,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getCategoryImageUrl, type Category } from "@/lib/categories";
+import type { Category } from "@/lib/categories";
 
 type CategoriesTableProps = {
   categories: Category[];
@@ -66,7 +65,6 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-16">Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Updated</TableHead>
@@ -76,7 +74,7 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
             {categories.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={3}
                   className="text-muted-foreground h-24 text-center"
                 >
                   No categories found.
@@ -100,7 +98,6 @@ function CategoryRow({ category }: { category: Category }) {
   const [mode, setMode] = useState<"detail" | "edit">("detail");
   const [isPending, startTransition] = useTransition();
   const updateAction = updateCategoryAction.bind(null, category.id);
-  const imageUrl = getCategoryImageUrl(category.imageUrl);
 
   function handleOpenChange(open: boolean) {
     setIsOpen(open);
@@ -131,21 +128,6 @@ function CategoryRow({ category }: { category: Category }) {
           }
         }}
       >
-        <TableCell>
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={`${category.name} category`}
-              width={48}
-              height={48}
-              className="size-12 rounded-md border object-cover"
-            />
-          ) : (
-            <div className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-md border text-xs">
-              No image
-            </div>
-          )}
-        </TableCell>
         <TableCell className="font-medium">{category.name}</TableCell>
         <TableCell>
           <Badge
@@ -159,13 +141,13 @@ function CategoryRow({ category }: { category: Category }) {
         </TableCell>
       </TableRow>
 
-      <DialogContent className={mode === "edit" ? "max-w-xl" : "max-w-2xl"}>
+      <DialogContent className="max-w-xl">
         {mode === "edit" ? (
           <>
             <DialogHeader>
               <DialogTitle>Edit category</DialogTitle>
               <DialogDescription>
-                Update the category name, image, and status.
+                Update the category name and status.
               </DialogDescription>
             </DialogHeader>
             <CategoryForm
@@ -182,60 +164,37 @@ function CategoryRow({ category }: { category: Category }) {
               <DialogDescription>Category details</DialogDescription>
             </DialogHeader>
 
-            <div className="grid gap-5 sm:grid-cols-[160px_1fr]">
-              <div className="bg-muted text-muted-foreground flex aspect-square items-center justify-center overflow-hidden rounded-md border text-sm">
-                {imageUrl ? (
-                  <Image
-                    src={imageUrl}
-                    alt={`${category.name} category`}
-                    width={320}
-                    height={320}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  "No image"
-                )}
+            <div className="grid gap-4">
+              <div>
+                <p className="text-muted-foreground text-sm">Name</p>
+                <p className="mt-1 text-sm font-medium">{category.name}</p>
               </div>
 
-              <div className="grid gap-4">
-                <div>
-                  <p className="text-muted-foreground text-sm">Name</p>
-                  <p className="mt-1 text-sm font-medium">{category.name}</p>
+              <div>
+                <p className="text-muted-foreground text-sm">Status</p>
+                <div className="mt-1">
+                  <Badge
+                    variant={
+                      category.status === "active" ? "success" : "secondary"
+                    }
+                  >
+                    {category.status}
+                  </Badge>
                 </div>
+              </div>
 
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-muted-foreground text-sm">Status</p>
-                  <div className="mt-1">
-                    <Badge
-                      variant={
-                        category.status === "active" ? "success" : "secondary"
-                      }
-                    >
-                      {category.status}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-muted-foreground text-sm">Image URL</p>
-                  <p className="text-muted-foreground mt-1 max-w-md truncate text-sm">
-                    {category.imageUrl || "No image"}
+                  <p className="text-muted-foreground text-sm">Created</p>
+                  <p className="mt-1 text-sm">
+                    {formatDate(category.createdAt)}
                   </p>
                 </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Created</p>
-                    <p className="mt-1 text-sm">
-                      {formatDate(category.createdAt)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-sm">Updated</p>
-                    <p className="mt-1 text-sm">
-                      {formatDate(category.updatedAt)}
-                    </p>
-                  </div>
+                <div>
+                  <p className="text-muted-foreground text-sm">Updated</p>
+                  <p className="mt-1 text-sm">
+                    {formatDate(category.updatedAt)}
+                  </p>
                 </div>
               </div>
             </div>
