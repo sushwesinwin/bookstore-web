@@ -7,16 +7,14 @@ import {
   deleteCategoryAction,
   updateCategoryAction,
 } from "@/app/admin/categories/actions";
+import {
+  AdminDataTable,
+  type AdminDataTableColumn,
+  type AdminDataTableFilter,
+} from "@/components/admin/admin-data-table";
 import { CategoryForm } from "@/components/admin/category-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -25,11 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Table,
-  TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import type { Category } from "@/lib/categories";
@@ -37,6 +31,36 @@ import type { Category } from "@/lib/categories";
 type CategoriesTableProps = {
   categories: Category[];
 };
+
+type CategoryTableColumn = "name" | "status" | "updated";
+type CategoryFilterKey = "status";
+type CategoryColumnVisibility = Record<CategoryTableColumn, boolean>;
+
+const tableColumns: Array<AdminDataTableColumn<CategoryTableColumn>> = [
+  { key: "name", label: "Name", required: true },
+  { key: "status", label: "Status" },
+  { key: "updated", label: "Updated" },
+];
+
+const defaultColumnVisibility: CategoryColumnVisibility = {
+  name: true,
+  status: true,
+  updated: true,
+};
+
+const filters: Array<AdminDataTableFilter<Category, CategoryFilterKey>> = [
+  {
+    key: "status",
+    label: "Status",
+    defaultValue: "all",
+    options: [
+      { label: "All statuses", value: "all" },
+      { label: "Active", value: "active" },
+      { label: "Inactive", value: "inactive" },
+    ],
+    predicate: (category, value) => category.status === value,
+  },
+];
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -54,45 +78,34 @@ function formatDate(value: string) {
 
 export function CategoriesTable({ categories }: CategoriesTableProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Catalog categories</CardTitle>
-        <CardDescription>
-          Manage categories from the category endpoint.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Updated</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="text-muted-foreground h-24 text-center"
-                >
-                  No categories found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              categories.map((category) => (
-                <CategoryRow key={category.id} category={category} />
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <AdminDataTable
+      columns={tableColumns}
+      defaultColumnVisibility={defaultColumnVisibility}
+      emptyMessage="No categories found."
+      filters={filters}
+      getRowId={(category) => category.id}
+      items={categories}
+      renderRow={(category, visibleColumns) => (
+        <CategoryRow category={category} visibleColumns={visibleColumns} />
+      )}
+      searchPlaceholder="Search categories"
+      searchPredicate={(category, query) =>
+        [category.name, category.status].some((value) =>
+          value.toLowerCase().includes(query),
+        )
+      }
+      tableClassName="min-w-[640px]"
+    />
   );
 }
 
-function CategoryRow({ category }: { category: Category }) {
+function CategoryRow({
+  category,
+  visibleColumns,
+}: {
+  category: Category;
+  visibleColumns: CategoryColumnVisibility;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [mode, setMode] = useState<"detail" | "edit">("detail");
@@ -128,17 +141,23 @@ function CategoryRow({ category }: { category: Category }) {
           }
         }}
       >
-        <TableCell className="font-medium">{category.name}</TableCell>
-        <TableCell>
-          <Badge
-            variant={category.status === "active" ? "success" : "secondary"}
-          >
-            {category.status}
-          </Badge>
-        </TableCell>
-        <TableCell className="text-muted-foreground">
-          {formatDate(category.updatedAt)}
-        </TableCell>
+        {visibleColumns.name ? (
+          <TableCell className="font-medium">{category.name}</TableCell>
+        ) : null}
+        {visibleColumns.status ? (
+          <TableCell>
+            <Badge
+              variant={category.status === "active" ? "success" : "secondary"}
+            >
+              {category.status}
+            </Badge>
+          </TableCell>
+        ) : null}
+        {visibleColumns.updated ? (
+          <TableCell className="text-muted-foreground">
+            {formatDate(category.updatedAt)}
+          </TableCell>
+        ) : null}
       </TableRow>
 
       <DialogContent className="max-w-xl">

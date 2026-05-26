@@ -29,7 +29,7 @@ export default async function AdminBooksPage() {
 
   return (
     <AdminShell active="books">
-      <header className="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-muted-foreground text-sm font-medium">
             Book management
