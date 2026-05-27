@@ -16,6 +16,7 @@ const navItems = [
   { href: "/#new", label: "New arrivals" },
   { href: "/#catalog", label: "Catalog" },
   { href: "/saved", label: "Saved" },
+  { href: "/cart", label: "Cart" },
 ];
 
 export function StorefrontMobileMenu() {

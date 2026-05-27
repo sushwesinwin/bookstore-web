@@ -119,6 +119,7 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
             <Card className="border-0 shadow-none sm:border sm:shadow-xs">
               <CardContent className="grid gap-4 p-4 sm:p-6 lg:p-7">
                 <BookPurchaseCta
+                  bookId={book.id}
                   priceLabel={formatCurrency(book.price)}
                   stock={book.stock}
                 />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Heart } from "lucide-react";
 
+import { CartNavButton } from "@/components/storefront/cart-nav-button";
 import { StorefrontMobileMenu } from "@/components/storefront/storefront-mobile-menu";
 import { Button } from "@/components/ui/button";
 
@@ -53,6 +54,7 @@ export default function StorefrontLayout({
                 <Heart className="size-4" />
               </Link>
             </Button>
+            <CartNavButton />
             <StorefrontMobileMenu />
           </div>
         </div>

@@ -4,16 +4,23 @@ import { useState } from "react";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useCart } from "./use-cart";
 
 type BookPurchaseCtaProps = {
+  bookId: string;
   priceLabel: string;
   stock: number;
 };
 
-export function BookPurchaseCta({ priceLabel, stock }: BookPurchaseCtaProps) {
+export function BookPurchaseCta({
+  bookId,
+  priceLabel,
+  stock,
+}: BookPurchaseCtaProps) {
   const maxQuantity = Math.max(stock, 0);
   const [quantity, setQuantity] = useState(maxQuantity > 0 ? 1 : 0);
   const [cartMessage, setCartMessage] = useState("");
+  const { addBookToCart, errorMessage, isMutating } = useCart();
 
   function decrementQuantity() {
     setCartMessage("");
@@ -25,8 +32,15 @@ export function BookPurchaseCta({ priceLabel, stock }: BookPurchaseCtaProps) {
     setQuantity((current) => Math.min(current + 1, maxQuantity));
   }
 
-  function addToCart() {
-    setCartMessage(`${quantity} ${quantity === 1 ? "copy" : "copies"} added`);
+  async function addToCart() {
+    try {
+      await addBookToCart(bookId, quantity);
+      setCartMessage(
+        `${quantity} ${quantity === 1 ? "copy" : "copies"} added`,
+      );
+    } catch {
+      setCartMessage("");
+    }
   }
 
   return (
@@ -80,17 +94,21 @@ export function BookPurchaseCta({ priceLabel, stock }: BookPurchaseCtaProps) {
 
             <Button
               type="button"
-              disabled={quantity === 0}
+              disabled={quantity === 0 || isMutating}
               onClick={addToCart}
               className="h-11 flex-1 sm:h-12"
             >
               <ShoppingCart className="size-4" />
-              Add to cart
+              {isMutating ? "Adding..." : "Add to cart"}
             </Button>
           </div>
         </div>
 
-        {cartMessage ? (
+        {errorMessage ? (
+          <p className="mx-auto w-full max-w-7xl text-sm font-medium text-red-600 sm:mx-0 sm:max-w-none">
+            {errorMessage}
+          </p>
+        ) : cartMessage ? (
           <p className="mx-auto w-full max-w-7xl text-sm font-medium text-red-600 sm:mx-0 sm:max-w-none">
             {cartMessage}
           </p>

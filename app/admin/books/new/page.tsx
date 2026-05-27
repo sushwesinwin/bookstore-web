@@ -3,6 +3,8 @@ import { BookForm } from "@/components/admin/book-form";
 import { createBookAction } from "@/app/admin/books/actions";
 import { getCategories } from "@/lib/categories";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewBookPage() {
   const categories = await getCategories();
 
