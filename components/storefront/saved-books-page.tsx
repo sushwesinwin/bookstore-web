@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Heart } from "lucide-react";
 
+import { BackButton } from "@/components/storefront/back-button";
 import { BookCatalog } from "@/components/storefront/book-catalog";
 import { Button } from "@/components/ui/button";
 import type { Book } from "@/lib/books";
@@ -18,25 +19,26 @@ export function SavedBooksPage({ books }: SavedBooksPageProps) {
 
   return (
     <div className="grid gap-6">
-      <header className="grid gap-3">
-        <p className="text-muted-foreground text-sm font-medium">
-          Reading list
-        </p>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="grid gap-2">
+      <div className="-ml-1">
+        <BackButton />
+      </div>
+      <header className="flex flex-row items-end justify-between gap-3">
+        <div className="grid min-w-0 gap-1 sm:gap-2">
+          <p className="text-muted-foreground text-xs font-medium sm:text-sm">
+            Reading list
+          </p>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               Saved books
             </h1>
             <p className="text-muted-foreground max-w-2xl">
               Keep track of books you want to revisit before buying.
             </p>
-          </div>
-          {isLoaded ? (
-            <p className="text-muted-foreground text-sm">
-              {savedBooks.length} saved
-            </p>
-          ) : null}
         </div>
+        {isLoaded ? (
+          <p className="text-muted-foreground whitespace-nowrap text-sm">
+            {savedBooks.length} saved
+          </p>
+        ) : null}
       </header>
 
       {!isLoaded ? (
@@ -64,7 +66,7 @@ export function SavedBooksPage({ books }: SavedBooksPageProps) {
           </div>
         </div>
       ) : (
-        <BookCatalog books={savedBooks} />
+        <BookCatalog books={savedBooks} showSearch={false} />
       )}
     </div>
   );

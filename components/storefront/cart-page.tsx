@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { getBookImageUrl } from "@/lib/books";
 import type { CartItem } from "@/lib/cart";
+import { BackButton } from "./back-button";
 import { useCart } from "./use-cart";
 
 const EMPTY_CART_ITEMS: CartItem[] = [];
@@ -67,7 +68,7 @@ function CartItemRow({
   const maxQuantity = Math.max(item.book.stock, 1);
 
   return (
-    <article className="grid grid-cols-[76px_minmax(0,1fr)] gap-4 rounded-lg border bg-background p-3 shadow-xs sm:grid-cols-[96px_minmax(0,1fr)] sm:p-4">
+    <article className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-lg border bg-background p-3 shadow-xs sm:grid-cols-[96px_minmax(0,1fr)] sm:gap-4 sm:p-4">
       <Link
         href={`/books/${item.book.id}`}
         className="bg-muted relative aspect-[3/4] overflow-hidden rounded-md border"
@@ -87,19 +88,22 @@ function CartItemRow({
         )}
       </Link>
 
-      <div className="grid min-w-0 gap-4">
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="grid min-w-0 gap-3 sm:gap-4">
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-3">
           <div className="min-w-0">
             <Link href={`/books/${item.book.id}`}>
-              <h2 className="line-clamp-2 font-medium leading-snug hover:underline">
+              <h2 className="line-clamp-2 text-sm font-medium leading-snug hover:underline sm:text-base">
                 {item.book.title}
               </h2>
             </Link>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="text-muted-foreground mt-1 line-clamp-1 text-xs sm:text-sm">
               by {item.book.author}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="rounded-full">
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <Badge
+                variant="outline"
+                className="rounded-full px-1.5 text-[10px] sm:px-2 sm:text-xs"
+              >
                 Stock: {item.book.stock.toLocaleString("en-US")}
               </Badge>
               <span className="text-muted-foreground text-xs">
@@ -108,17 +112,17 @@ function CartItemRow({
             </div>
           </div>
 
-          <div className="text-left sm:text-right">
-            <p className="text-xs font-medium uppercase text-muted-foreground">
+          <div className="flex items-center justify-between gap-3 sm:block sm:text-right">
+            <p className="text-[10px] font-medium uppercase text-muted-foreground sm:text-xs">
               Item total
             </p>
-            <p className="mt-1 font-semibold text-red-600">
+            <p className="font-semibold text-red-600 sm:mt-1">
               {formatCurrency(itemTotal)}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+        <div className="flex items-center justify-between gap-2 border-t pt-3">
           <div className="flex items-center rounded-full bg-muted/40 p-1">
             <Button
               type="button"
@@ -127,11 +131,11 @@ function CartItemRow({
               aria-label="Decrease quantity"
               disabled={item.quantity <= 1 || isMutating}
               onClick={() => onChangeQuantity(item.id, item.quantity - 1)}
-              className="size-8 rounded-full bg-background shadow-none"
+              className="size-7 rounded-full bg-background shadow-none sm:size-8"
             >
-              <Minus className="size-4" />
+              <Minus className="size-3.5 sm:size-4" />
             </Button>
-            <span className="min-w-10 text-center text-sm font-medium">
+            <span className="min-w-8 text-center text-sm font-medium sm:min-w-10">
               {item.quantity}
             </span>
             <Button
@@ -141,9 +145,9 @@ function CartItemRow({
               aria-label="Increase quantity"
               disabled={item.quantity >= maxQuantity || isMutating}
               onClick={() => onChangeQuantity(item.id, item.quantity + 1)}
-              className="size-8 rounded-full bg-background shadow-none"
+              className="size-7 rounded-full bg-background shadow-none sm:size-8"
             >
-              <Plus className="size-4" />
+              <Plus className="size-3.5 sm:size-4" />
             </Button>
           </div>
 
@@ -152,9 +156,9 @@ function CartItemRow({
             variant="ghost"
             onClick={() => onRemoveItem(item.id)}
             disabled={isMutating}
-            className="text-muted-foreground hover:text-foreground"
+            className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground sm:px-3"
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-3.5 sm:size-4" />
             Remove
           </Button>
         </div>
@@ -197,28 +201,32 @@ export function CartPage() {
 
   return (
     <>
-      <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="grid gap-2">
-          <p className="text-muted-foreground text-sm font-medium">
-            Shopping cart
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Cart
-          </h1>
+      <div className="mx-auto grid w-full max-w-7xl gap-5 px-3 pb-[calc(22rem+env(safe-area-inset-bottom))] pt-5 sm:gap-6 sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
+        <div className="-ml-1">
+          <BackButton />
         </div>
-        {items.length > 0 ? (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsClearDialogOpen(true)}
-            disabled={isMutating}
-          >
-            <Trash2 className="size-4" />
-            Clear cart
-          </Button>
-        ) : null}
-      </header>
+        <header className="flex flex-row items-end justify-between gap-3">
+          <div className="grid min-w-0 gap-1 sm:gap-2">
+            <p className="text-muted-foreground text-xs font-medium sm:text-sm">
+              Shopping cart
+            </p>
+            <h1 className="truncate text-2xl font-semibold tracking-tight sm:text-4xl">
+              Cart
+            </h1>
+          </div>
+          {items.length > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsClearDialogOpen(true)}
+              disabled={isMutating}
+              className="h-8 px-2 text-xs sm:h-9 sm:px-4 sm:text-sm"
+            >
+              <Trash2 className="size-3.5 sm:size-4" />
+              Clear cart
+            </Button>
+          ) : null}
+        </header>
 
       {!isLoaded ? (
         <div className="bg-muted/40 flex min-h-52 items-center justify-center rounded-lg border border-dashed p-8 text-center">
@@ -242,8 +250,8 @@ export function CartPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <section className="grid content-start gap-4">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6">
+          <section className="grid content-start gap-3 sm:gap-4">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-semibold">Items</h2>
               <p className="text-muted-foreground text-sm">
@@ -251,6 +259,12 @@ export function CartPage() {
                 {itemCount === 1 ? "copy" : "copies"}
               </p>
             </div>
+            <Button asChild variant="outline" className="w-full sm:w-fit">
+              <Link href="/">
+                <Plus className="size-4" />
+                Add more books
+              </Link>
+            </Button>
             {items.map((item) => (
               <CartItemRow
                 key={item.id}
@@ -266,10 +280,10 @@ export function CartPage() {
             ))}
           </section>
 
-          <aside className="self-start rounded-lg border bg-background shadow-lg shadow-black/10 lg:sticky lg:top-20">
-            <div className="flex min-h-80 flex-col p-5 lg:p-6">
+          <aside className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl border bg-background shadow-[0_-12px_30px_rgba(0,0,0,0.14)] lg:sticky lg:top-20 lg:bottom-auto lg:rounded-lg lg:shadow-lg lg:shadow-black/10">
+            <div className="flex flex-col p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-5 lg:min-h-80 lg:p-6">
               <div>
-                <h2 className="text-xl font-semibold tracking-tight">
+                <h2 className="text-base font-semibold tracking-tight sm:text-xl">
                   Order summary
                 </h2>
                 <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium leading-4 text-foreground">
@@ -278,7 +292,7 @@ export function CartPage() {
                 </div>
               </div>
 
-              <div className="mt-9 grid gap-4 text-sm">
+              <div className="mt-4 grid gap-3 text-sm sm:gap-4 lg:mt-9">
                 <div className="grid grid-cols-[1fr_auto] items-center gap-4">
                   <span className="text-muted-foreground">Items</span>
                   <span className="text-right">
@@ -297,14 +311,14 @@ export function CartPage() {
                 </div>
               </div>
 
-              <div className="mt-auto pt-3">
+              <div className="mt-4 pt-0 lg:mt-auto lg:pt-3">
                 <div className="grid grid-cols-[1fr_auto] items-center gap-4 border-t pt-3 text-lg font-semibold">
                   <span>Total</span>
                   <span className="text-right text-red-600">
                     {formatCurrency(total)}
                   </span>
                 </div>
-                <Button type="button" className="mt-5 h-11 w-full">
+                <Button type="button" className="mt-4 h-11 w-full lg:mt-5">
                   Go to checkout
                 </Button>
                 {errorMessage ? (

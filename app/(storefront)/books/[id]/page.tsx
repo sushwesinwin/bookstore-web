@@ -1,11 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
+import { BackButton } from "@/components/storefront/back-button";
 import { BookActions } from "@/components/storefront/book-actions";
 import { BookPurchaseCta } from "@/components/storefront/book-purchase-cta";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBook, getBookImageUrl, type Book } from "@/lib/books";
 
@@ -46,14 +44,9 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
   return (
     <>
       <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        <div className="flex items-start">
-          <Button asChild variant="ghost" size="icon" className="-ml-2 size-9">
-            <Link href="/" aria-label="Back to books">
-              <ArrowLeft className="size-5" />
-            </Link>
-          </Button>
+        <div className="-ml-1">
+          <BackButton />
         </div>
-
         <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[380px_minmax(0,1fr)]">
           <section className="grid grid-cols-[2.25rem_minmax(0,15rem)_2.25rem] items-start justify-center gap-3 sm:flex sm:justify-center lg:sticky lg:top-24 lg:self-start">
             <div className="size-9 sm:hidden" aria-hidden="true" />
@@ -96,19 +89,21 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
 
           <section className="grid content-start gap-6 lg:pt-2">
             <div className="grid gap-4">
-              <div className="flex min-w-0 items-start justify-between gap-4">
-                <h1 className="min-w-0 max-w-3xl flex-1 break-words text-center text-2xl font-semibold leading-tight tracking-tight sm:text-left sm:text-4xl lg:text-5xl">
-                  {book.title}
-                </h1>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 sm:gap-3">
+                <div className="min-w-0">
+                  <h1 className="min-w-0 max-w-3xl break-words text-left text-2xl font-semibold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                    {book.title}
+                  </h1>
+                  <p className="text-muted-foreground mt-2 text-sm sm:text-base">
+                    by {book.author}
+                  </p>
+                </div>
                 <BookActions
                   bookId={book.id}
                   bookTitle={book.title}
                   className="hidden sm:grid"
                 />
               </div>
-              <p className="text-muted-foreground text-center text-sm sm:text-left sm:text-base">
-                by {book.author}
-              </p>
               <div className="grid gap-2 lg:pt-2">
                 <p className="text-muted-foreground max-w-3xl text-sm leading-6 sm:text-base sm:leading-7">
                   {book.description || "No description provided."}
