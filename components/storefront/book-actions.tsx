@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Heart, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type BookActionsProps = {
   bookTitle: string;
+  className?: string;
 };
 
-export function BookActions({ bookTitle }: BookActionsProps) {
+export function BookActions({ bookTitle, className }: BookActionsProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
 
@@ -42,8 +44,8 @@ export function BookActions({ bookTitle }: BookActionsProps) {
   }
 
   return (
-    <div className="grid gap-2">
-      <div className="flex flex-wrap gap-2">
+    <div className={cn("grid shrink-0 justify-items-end gap-2", className)}>
+      <div className="flex gap-2">
         <Button
           type="button"
           variant="outline"
@@ -52,7 +54,7 @@ export function BookActions({ bookTitle }: BookActionsProps) {
           aria-pressed={isSaved}
           title={isSaved ? "Remove from saved" : "Save book"}
           onClick={toggleSaved}
-          className="size-10"
+          className="size-9 rounded-full sm:size-10"
         >
           <Heart
             className={isSaved ? "size-4 fill-red-600 text-red-600" : "size-4"}
@@ -65,14 +67,16 @@ export function BookActions({ bookTitle }: BookActionsProps) {
           aria-label="Share book"
           title="Share book"
           onClick={shareBook}
-          className="size-10"
+          className="size-9 rounded-full sm:size-10"
         >
           <Share2 className="size-4" />
         </Button>
       </div>
 
       {actionMessage ? (
-        <p className="text-sm font-medium text-red-600">{actionMessage}</p>
+        <p className="text-right text-xs font-medium text-red-600 sm:text-sm">
+          {actionMessage}
+        </p>
       ) : null}
     </div>
   );
