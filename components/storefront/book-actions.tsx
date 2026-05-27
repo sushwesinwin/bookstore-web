@@ -5,22 +5,23 @@ import { Heart, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSavedBooks } from "./use-saved-books";
 
 type BookActionsProps = {
+  bookId: string;
   bookTitle: string;
   className?: string;
 };
 
-export function BookActions({ bookTitle, className }: BookActionsProps) {
-  const [isSaved, setIsSaved] = useState(false);
+export function BookActions({ bookId, bookTitle, className }: BookActionsProps) {
+  const { isBookSaved, toggleSavedBook } = useSavedBooks();
   const [actionMessage, setActionMessage] = useState("");
+  const isSaved = isBookSaved(bookId);
 
   function toggleSaved() {
-    setIsSaved((current) => {
-      const nextSaved = !current;
-      setActionMessage(nextSaved ? "Saved" : "Removed from saved");
-      return nextSaved;
-    });
+    const nextSaved = toggleSavedBook(bookId);
+
+    setActionMessage(nextSaved ? "Saved" : "Removed from saved");
   }
 
   async function shareBook() {
@@ -45,7 +46,7 @@ export function BookActions({ bookTitle, className }: BookActionsProps) {
 
   return (
     <div className={cn("grid shrink-0 justify-items-end gap-2", className)}>
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2">
         <Button
           type="button"
           variant="outline"

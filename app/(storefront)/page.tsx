@@ -35,10 +35,6 @@ export default async function Home() {
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight">
             Find your next read from our latest collection.
           </h1>
-          <p className="text-muted-foreground max-w-2xl">
-            Search the catalog by title, author, or keyword and browse books
-            currently managed by the store.
-          </p>
         </header>
 
         {loadError ? (

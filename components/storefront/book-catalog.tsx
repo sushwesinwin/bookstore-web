@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getBookImageUrl, type Book } from "@/lib/books";
+import { useSavedBooks } from "./use-saved-books";
 
 type BookCatalogProps = {
   books: Book[];
@@ -23,7 +24,7 @@ export function BookCatalog({
   showCount = true,
 }: BookCatalogProps) {
   const [query, setQuery] = useState("");
-  const [savedBookIds, setSavedBookIds] = useState<Set<string>>(new Set());
+  const { isBookSaved, toggleSavedBook } = useSavedBooks();
   const filteredBooks = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -37,20 +38,6 @@ export function BookCatalog({
         .some((value) => value?.toLowerCase().includes(normalizedQuery));
     });
   }, [books, query]);
-
-  function toggleSaved(bookId: string) {
-    setSavedBookIds((current) => {
-      const nextSavedBookIds = new Set(current);
-
-      if (nextSavedBookIds.has(bookId)) {
-        nextSavedBookIds.delete(bookId);
-      } else {
-        nextSavedBookIds.add(bookId);
-      }
-
-      return nextSavedBookIds;
-    });
-  }
 
   async function shareBook(book: Book) {
     const url = `${window.location.origin}/books/${book.id}`;
@@ -106,7 +93,7 @@ export function BookCatalog({
           {filteredBooks.map((book, index) => {
             const imageUrl = getBookImageUrl(book.imageUrl);
             const isFirstImage = index === 0;
-            const isSaved = savedBookIds.has(book.id);
+            const isSaved = isBookSaved(book.id);
 
             return (
               <Card
@@ -142,14 +129,14 @@ export function BookCatalog({
                       )}
                     </div>
                   </Link>
-                  <div className="pointer-events-none absolute inset-x-2 top-2 z-20 flex items-center justify-between opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100">
+                  <div className="pointer-events-none absolute right-2 top-2 z-20 flex flex-col items-center gap-2 opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100">
                     <Button
                       type="button"
                       variant="outline"
                       size="icon"
                       aria-label={isSaved ? "Remove from saved" : "Save book"}
                       aria-pressed={isSaved}
-                      onClick={() => toggleSaved(book.id)}
+                      onClick={() => toggleSavedBook(book.id)}
                       className="pointer-events-auto size-8 rounded-full bg-background/95 shadow-sm backdrop-blur"
                     >
                       <Heart

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Heart } from "lucide-react";
 
 import { StorefrontMobileMenu } from "@/components/storefront/storefront-mobile-menu";
+import { Button } from "@/components/ui/button";
 
 export default function StorefrontLayout({
   children,
@@ -10,7 +12,7 @@ export default function StorefrontLayout({
   return (
     <main className="min-h-screen bg-background">
       <nav className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
+        <div className="mx-auto grid h-14 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-3 px-4 sm:h-16 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:px-8">
           <Link
             href="/"
             className="min-w-0 shrink font-semibold tracking-tight"
@@ -22,7 +24,7 @@ export default function StorefrontLayout({
             </span>
           </Link>
 
-          <div className="hidden items-center gap-6 text-sm font-medium md:flex">
+          <div className="hidden items-center justify-center gap-6 text-sm font-medium md:flex">
             <Link className="text-foreground" href="/">
               Books
             </Link>
@@ -40,7 +42,19 @@ export default function StorefrontLayout({
             </Link>
           </div>
 
-          <StorefrontMobileMenu />
+          <div className="flex justify-end gap-2">
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              className="size-9 rounded-full"
+            >
+              <Link href="/saved" aria-label="Saved books" title="Saved books">
+                <Heart className="size-4" />
+              </Link>
+            </Button>
+            <StorefrontMobileMenu />
+          </div>
         </div>
       </nav>
       {children}

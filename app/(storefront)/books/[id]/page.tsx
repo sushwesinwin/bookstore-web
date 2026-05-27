@@ -46,18 +46,18 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
   return (
     <>
       <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start">
           <Button asChild variant="ghost" size="icon" className="-ml-2 size-9">
             <Link href="/" aria-label="Back to books">
               <ArrowLeft className="size-5" />
             </Link>
           </Button>
-          <BookActions bookTitle={book.title} />
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[380px_minmax(0,1fr)]">
-          <section className="lg:sticky lg:top-24 lg:self-start">
-            <div className="bg-muted relative mx-auto aspect-[3/4] w-full max-w-60 rounded-lg border shadow-sm sm:max-w-72 lg:max-w-none lg:rounded-xl">
+          <section className="grid grid-cols-[2.25rem_minmax(0,15rem)_2.25rem] items-start justify-center gap-3 sm:flex sm:justify-center lg:sticky lg:top-24 lg:self-start">
+            <div className="size-9 sm:hidden" aria-hidden="true" />
+            <div className="bg-muted relative aspect-[3/4] w-full max-w-60 min-w-0 rounded-lg border shadow-sm sm:max-w-72 lg:max-w-none lg:rounded-xl">
               <div className="relative h-full overflow-hidden rounded-lg">
                 {imageUrl ? (
                   <Image
@@ -77,7 +77,7 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
               {book.isBestSeller ? (
                 <div
                   aria-label="Best seller"
-                  className="pointer-events-none absolute right-2 top-3 z-10 grid size-14 place-items-center rounded-md border border-white/70 bg-red-600 p-2 text-center text-[9px] font-bold uppercase leading-tight text-white shadow-lg sm:right-0 sm:top-4 sm:size-[4.5rem] sm:translate-x-1/3 sm:text-[10px]"
+                  className="pointer-events-none absolute right-2 top-3 z-10 grid size-14 place-items-center rounded-full border border-white/70 bg-red-600 p-2 text-center text-[9px] font-bold uppercase leading-tight text-white shadow-lg sm:right-0 sm:top-4 sm:size-[4.5rem] sm:translate-x-1/3 sm:text-[10px]"
                 >
                   <span>
                     Best
@@ -87,6 +87,11 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
                 </div>
               ) : null}
             </div>
+            <BookActions
+              bookId={book.id}
+              bookTitle={book.title}
+              className="sm:hidden"
+            />
           </section>
 
           <section className="grid content-start gap-6 lg:pt-2">
@@ -95,6 +100,11 @@ export default async function BookDetailPage({ params }: BookDetailPageProps) {
                 <h1 className="min-w-0 max-w-3xl flex-1 break-words text-center text-2xl font-semibold leading-tight tracking-tight sm:text-left sm:text-4xl lg:text-5xl">
                   {book.title}
                 </h1>
+                <BookActions
+                  bookId={book.id}
+                  bookTitle={book.title}
+                  className="hidden sm:grid"
+                />
               </div>
               <p className="text-muted-foreground text-center text-sm sm:text-left sm:text-base">
                 by {book.author}
