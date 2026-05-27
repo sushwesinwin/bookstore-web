@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 
@@ -82,27 +83,35 @@ export function BookCatalog({
                     Best seller
                   </Badge>
                 ) : null}
-                <div className="bg-muted relative aspect-[3/4] overflow-hidden rounded-md border shadow-xs transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-lg">
-                  {imageUrl ? (
-                    <Image
-                      src={imageUrl}
-                      alt={`${book.title} cover`}
-                      fill
-                      priority={isFirstImage}
-                      loading={isFirstImage ? "eager" : "lazy"}
-                      sizes="(min-width: 1280px) 16vw, (min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
-                      No cover
-                    </div>
-                  )}
-                </div>
+                <Link
+                  href={`/books/${book.id}`}
+                  aria-label={`View ${book.title}`}
+                  className="block"
+                >
+                  <div className="bg-muted relative aspect-[3/4] overflow-hidden rounded-md border shadow-xs transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-lg">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={`${book.title} cover`}
+                        fill
+                        priority={isFirstImage}
+                        loading={isFirstImage ? "eager" : "lazy"}
+                        sizes="(min-width: 1280px) 16vw, (min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+                        No cover
+                      </div>
+                    )}
+                  </div>
+                </Link>
                 <CardContent className="px-1 pt-2 pb-0">
-                  <h2 className="text-xs leading-4 font-medium transition-colors group-hover:text-foreground">
-                    {book.title}
-                  </h2>
+                  <Link href={`/books/${book.id}`}>
+                    <h2 className="text-xs leading-4 font-medium transition-colors group-hover:text-foreground hover:underline">
+                      {book.title}
+                    </h2>
+                  </Link>
                   <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
                     by {book.author}
                   </p>
