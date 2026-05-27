@@ -22,13 +22,52 @@ type BookFilterKey = "category" | "stock" | "type";
 
 const tableColumns: Array<AdminDataTableColumn<BookTableColumn>> = [
   { key: "cover", label: "Cover", className: "w-16" },
-  { key: "title", label: "Title", required: true },
-  { key: "author", label: "Author" },
-  { key: "category", label: "Category" },
-  { key: "status", label: "Status" },
-  { key: "price", label: "Price", className: "text-right" },
-  { key: "stock", label: "Stock", className: "text-right" },
-  { key: "updated", label: "Updated" },
+  { key: "title", label: "Title", required: true, sortable: true },
+  { key: "author", label: "Author", sortable: true },
+  {
+    key: "category",
+    label: "Category",
+    sortable: true,
+    sortValue: (item) => (item as Book).category?.name ?? "Uncategorized",
+  },
+  {
+    key: "status",
+    label: "Status",
+    sortable: true,
+    sortValue: (item) => {
+      const book = item as Book;
+
+      if (book.stock <= 0) {
+        return "Out of stock";
+      }
+
+      if (book.stock <= 5) {
+        return "Low stock";
+      }
+
+      return "In stock";
+    },
+  },
+  {
+    key: "price",
+    label: "Price",
+    className: "text-right",
+    sortable: true,
+    sortValue: (item) => Number((item as Book).price),
+  },
+  { key: "stock", label: "Stock", className: "text-right", sortable: true },
+  {
+    key: "updated",
+    label: "Updated",
+    sortable: true,
+    sortValue: (item) => (item as Book).updatedAt,
+  },
+  {
+    key: "actions",
+    label: "Actions",
+    className: "w-28 text-right",
+    required: true,
+  },
 ];
 
 const defaultColumnVisibility: BookTableColumnVisibility = {
@@ -40,6 +79,7 @@ const defaultColumnVisibility: BookTableColumnVisibility = {
   price: true,
   stock: true,
   updated: true,
+  actions: true,
 };
 
 export function BooksTable({ books, categories }: BooksTableProps) {

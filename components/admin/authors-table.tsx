@@ -9,15 +9,15 @@ import {
 import { Pencil, Trash2 } from "lucide-react";
 
 import {
-  deleteCategoryAction,
-  updateCategoryAction,
-} from "@/app/admin/categories/actions";
+  deleteAuthorAction,
+  updateAuthorAction,
+} from "@/app/admin/authors/actions";
 import {
   AdminDataTable,
   type AdminDataTableColumn,
   type AdminDataTableFilter,
 } from "@/components/admin/admin-data-table";
-import { CategoryForm } from "@/components/admin/category-form";
+import { AuthorForm } from "@/components/admin/author-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,24 +28,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TableCell, TableRow } from "@/components/ui/table";
-import type { Category } from "@/lib/categories";
+import type { Author } from "@/lib/authors";
 
-type CategoriesTableProps = {
-  categories: Category[];
+type AuthorsTableProps = {
+  authors: Author[];
 };
 
-type CategoryTableColumn = "name" | "status" | "updated" | "actions";
-type CategoryFilterKey = "status";
-type CategoryColumnVisibility = Record<CategoryTableColumn, boolean>;
+type AuthorTableColumn = "name" | "bio" | "status" | "updated" | "actions";
+type AuthorFilterKey = "status";
+type AuthorColumnVisibility = Record<AuthorTableColumn, boolean>;
 
-const tableColumns: Array<AdminDataTableColumn<CategoryTableColumn>> = [
+const tableColumns: Array<AdminDataTableColumn<AuthorTableColumn>> = [
   { key: "name", label: "Name", required: true, sortable: true },
+  { key: "bio", label: "Bio", sortable: true },
   { key: "status", label: "Status", sortable: true },
   {
     key: "updated",
     label: "Updated",
     sortable: true,
-    sortValue: (item) => (item as Category).updatedAt,
+    sortValue: (item) => (item as Author).updatedAt,
   },
   {
     key: "actions",
@@ -55,14 +56,15 @@ const tableColumns: Array<AdminDataTableColumn<CategoryTableColumn>> = [
   },
 ];
 
-const defaultColumnVisibility: CategoryColumnVisibility = {
+const defaultColumnVisibility: AuthorColumnVisibility = {
   name: true,
+  bio: true,
   status: true,
   updated: true,
   actions: true,
 };
 
-const filters: Array<AdminDataTableFilter<Category, CategoryFilterKey>> = [
+const filters: Array<AdminDataTableFilter<Author, AuthorFilterKey>> = [
   {
     key: "status",
     label: "Status",
@@ -72,7 +74,7 @@ const filters: Array<AdminDataTableFilter<Category, CategoryFilterKey>> = [
       { label: "Active", value: "active" },
       { label: "Inactive", value: "inactive" },
     ],
-    predicate: (category, value) => category.status === value,
+    predicate: (author, value) => author.status === value,
   },
 ];
 
@@ -90,41 +92,41 @@ function formatDate(value: string) {
   }).format(date);
 }
 
-export function CategoriesTable({ categories }: CategoriesTableProps) {
+export function AuthorsTable({ authors }: AuthorsTableProps) {
   return (
     <AdminDataTable
       columns={tableColumns}
       defaultColumnVisibility={defaultColumnVisibility}
-      emptyMessage="No categories found."
+      emptyMessage="No authors found."
       filters={filters}
-      getRowId={(category) => category.id}
-      items={categories}
-      renderRow={(category, visibleColumns) => (
-        <CategoryRow category={category} visibleColumns={visibleColumns} />
+      getRowId={(author) => author.id}
+      items={authors}
+      renderRow={(author, visibleColumns) => (
+        <AuthorRow author={author} visibleColumns={visibleColumns} />
       )}
-      searchPlaceholder="Search categories"
-      searchPredicate={(category, query) =>
-        [category.name, category.status].some((value) =>
-          value.toLowerCase().includes(query),
-        )
+      searchPlaceholder="Search authors"
+      searchPredicate={(author, query) =>
+        [author.name, author.bio, author.status]
+          .filter(Boolean)
+          .some((value) => value?.toLowerCase().includes(query))
       }
-      tableClassName="min-w-[640px]"
+      tableClassName="min-w-[720px]"
     />
   );
 }
 
-function CategoryRow({
-  category,
+function AuthorRow({
+  author,
   visibleColumns,
 }: {
-  category: Category;
-  visibleColumns: CategoryColumnVisibility;
+  author: Author;
+  visibleColumns: AuthorColumnVisibility;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [mode, setMode] = useState<"detail" | "edit">("detail");
   const [isPending, startTransition] = useTransition();
-  const updateAction = updateCategoryAction.bind(null, category.id);
+  const updateAction = updateAuthorAction.bind(null, author.id);
 
   function handleOpenChange(open: boolean) {
     setIsOpen(open);
@@ -136,7 +138,7 @@ function CategoryRow({
 
   function handleDelete() {
     startTransition(async () => {
-      await deleteCategoryAction(category.id);
+      await deleteAuthorAction(author.id);
       setIsDeleteOpen(false);
       setIsOpen(false);
     });
@@ -160,20 +162,27 @@ function CategoryRow({
         }}
       >
         {visibleColumns.name ? (
-          <TableCell className="font-medium">{category.name}</TableCell>
+          <TableCell className="font-medium">{author.name}</TableCell>
+        ) : null}
+        {visibleColumns.bio ? (
+          <TableCell className="text-muted-foreground">
+            <p className="max-w-md truncate">
+              {author.bio || "No bio provided."}
+            </p>
+          </TableCell>
         ) : null}
         {visibleColumns.status ? (
           <TableCell>
             <Badge
-              variant={category.status === "active" ? "success" : "secondary"}
+              variant={author.status === "active" ? "success" : "secondary"}
             >
-              {category.status}
+              {author.status}
             </Badge>
           </TableCell>
         ) : null}
         {visibleColumns.updated ? (
           <TableCell className="text-muted-foreground">
-            {formatDate(category.updatedAt)}
+            {formatDate(author.updatedAt)}
           </TableCell>
         ) : null}
         {visibleColumns.actions ? (
@@ -187,7 +196,7 @@ function CategoryRow({
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={`Edit ${category.name}`}
+                aria-label={`Edit ${author.name}`}
                 onClick={() => {
                   setMode("edit");
                   setIsOpen(true);
@@ -199,7 +208,7 @@ function CategoryRow({
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={`Delete ${category.name}`}
+                aria-label={`Delete ${author.name}`}
                 className="text-red-600 hover:bg-red-50 hover:text-red-700"
                 disabled={isPending}
                 onClick={() => setIsDeleteOpen(true)}
@@ -215,14 +224,14 @@ function CategoryRow({
         {mode === "edit" ? (
           <>
             <DialogHeader>
-              <DialogTitle>Edit category</DialogTitle>
+              <DialogTitle>Edit author</DialogTitle>
               <DialogDescription>
-                Update the category name and status.
+                Update the author profile and status.
               </DialogDescription>
             </DialogHeader>
-            <CategoryForm
+            <AuthorForm
               action={updateAction}
-              category={category}
+              author={author}
               onCancel={() => setMode("detail")}
               submitLabel="Save changes"
             />
@@ -230,14 +239,21 @@ function CategoryRow({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>{category.name}</DialogTitle>
-              <DialogDescription>Category details</DialogDescription>
+              <DialogTitle>{author.name}</DialogTitle>
+              <DialogDescription>Author details</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4">
               <div>
                 <p className="text-muted-foreground text-sm">Name</p>
-                <p className="mt-1 text-sm font-medium">{category.name}</p>
+                <p className="mt-1 text-sm font-medium">{author.name}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground text-sm">Bio</p>
+                <p className="mt-1 text-sm">
+                  {author.bio || "No bio provided."}
+                </p>
               </div>
 
               <div>
@@ -245,10 +261,10 @@ function CategoryRow({
                 <div className="mt-1">
                   <Badge
                     variant={
-                      category.status === "active" ? "success" : "secondary"
+                      author.status === "active" ? "success" : "secondary"
                     }
                   >
-                    {category.status}
+                    {author.status}
                   </Badge>
                 </div>
               </div>
@@ -256,15 +272,11 @@ function CategoryRow({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <p className="text-muted-foreground text-sm">Created</p>
-                  <p className="mt-1 text-sm">
-                    {formatDate(category.createdAt)}
-                  </p>
+                  <p className="mt-1 text-sm">{formatDate(author.createdAt)}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm">Updated</p>
-                  <p className="mt-1 text-sm">
-                    {formatDate(category.updatedAt)}
-                  </p>
+                  <p className="mt-1 text-sm">{formatDate(author.updatedAt)}</p>
                 </div>
               </div>
             </div>
@@ -281,9 +293,9 @@ function CategoryRow({
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete category?</DialogTitle>
+            <DialogTitle>Delete author?</DialogTitle>
             <DialogDescription>
-              This will permanently delete &quot;{category.name}&quot;.
+              This will permanently delete &quot;{author.name}&quot;.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -300,7 +312,7 @@ function CategoryRow({
               onClick={handleDelete}
             >
               <Trash2 />
-              Delete category
+              Delete author
             </Button>
           </div>
         </DialogContent>

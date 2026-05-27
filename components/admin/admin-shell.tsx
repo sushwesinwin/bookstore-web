@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { BookMarked, LayoutDashboard, Tags } from "lucide-react";
+import { BookMarked, LayoutDashboard, Tags, UserRound } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-type AdminNavKey = "dashboard" | "books" | "categories";
+type AdminNavKey = "dashboard" | "books" | "authors" | "categories";
 
 const adminNavItems = [
   {
@@ -18,6 +18,12 @@ const adminNavItems = [
     label: "Books",
     href: "/admin/books",
     icon: BookMarked,
+  },
+  {
+    key: "authors",
+    label: "Authors",
+    href: "/admin/authors",
+    icon: UserRound,
   },
   {
     key: "categories",

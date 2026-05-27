@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useTransition } from "react";
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useState,
+  useTransition,
+} from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 import {
@@ -36,7 +41,8 @@ export type BookTableColumn =
   | "status"
   | "price"
   | "stock"
-  | "updated";
+  | "updated"
+  | "actions";
 
 export type BookTableColumnVisibility = Record<BookTableColumn, boolean>;
 
@@ -104,6 +110,7 @@ export function BookDetailDialog({
     price: true,
     stock: true,
     updated: true,
+    actions: true,
   },
 }: BookDetailDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -128,6 +135,10 @@ export function BookDetailDialog({
       setIsDeleteOpen(false);
       setIsOpen(false);
     });
+  }
+
+  function stopRowEvent(event: MouseEvent | KeyboardEvent) {
+    event.stopPropagation();
   }
 
   return (
@@ -209,6 +220,39 @@ export function BookDetailDialog({
         {visibleColumns.updated ? (
           <TableCell className="text-muted-foreground">
             {formatShortDate(book.updatedAt)}
+          </TableCell>
+        ) : null}
+        {visibleColumns.actions ? (
+          <TableCell
+            className="text-right"
+            onClick={stopRowEvent}
+            onKeyDown={stopRowEvent}
+          >
+            <div className="flex justify-end gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={`Edit ${book.title}`}
+                onClick={() => {
+                  setMode("edit");
+                  setIsOpen(true);
+                }}
+              >
+                <Pencil />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={`Delete ${book.title}`}
+                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                disabled={isPending}
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                <Trash2 />
+              </Button>
+            </div>
           </TableCell>
         ) : null}
       </TableRow>
@@ -317,18 +361,6 @@ export function BookDetailDialog({
             <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
               <Button variant="outline" onClick={() => setIsOpen(false)}>
                 Cancel
-              </Button>
-              <Button variant="outline" onClick={() => setMode("edit")}>
-                <Pencil />
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                disabled={isPending}
-                onClick={() => setIsDeleteOpen(true)}
-              >
-                <Trash2 />
-                Delete
               </Button>
             </div>
           </>

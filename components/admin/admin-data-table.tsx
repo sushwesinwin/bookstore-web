@@ -1,7 +1,15 @@
 "use client";
 
 import { Fragment, type ReactNode, useMemo, useState } from "react";
-import { RotateCcw, Search, Settings2, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  RotateCcw,
+  Search,
+  Settings2,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +52,8 @@ export type AdminDataTableColumn<TKey extends string> = {
   label: string;
   className?: string;
   required?: boolean;
+  sortable?: boolean;
+  sortValue?: (item: unknown) => unknown;
 };
 
 export type AdminDataTableFilter<TItem, TKey extends string> = {
@@ -81,6 +91,58 @@ type AdminDataTableProps<
 };
 
 const defaultPageSizeOptions = [5, 10, 20, 50];
+
+type SortDirection = "asc" | "desc";
+
+type SortState<TKey extends string> = {
+  key: TKey;
+  direction: SortDirection;
+} | null;
+
+function normalizeSortValue(value: unknown) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "boolean") {
+    return value ? 1 : 0;
+  }
+
+  const date = new Date(String(value));
+
+  if (!Number.isNaN(date.getTime()) && /^\d{4}-\d{2}-\d{2}/.test(String(value))) {
+    return date.getTime();
+  }
+
+  return String(value).toLowerCase();
+}
+
+function getItemSortValue<TItem, TColumnKey extends string>(
+  item: TItem,
+  column: AdminDataTableColumn<TColumnKey>,
+) {
+  return normalizeSortValue(
+    column.sortValue?.(item) ?? (item as Record<string, unknown>)[column.key],
+  );
+}
+
+function compareSortValues(left: unknown, right: unknown) {
+  const normalizedLeft = normalizeSortValue(left);
+  const normalizedRight = normalizeSortValue(right);
+
+  if (typeof normalizedLeft === "number" && typeof normalizedRight === "number") {
+    return normalizedLeft - normalizedRight;
+  }
+
+  return String(normalizedLeft).localeCompare(String(normalizedRight), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
 
 export function AdminDataTable<
   TItem,
@@ -130,7 +192,10 @@ export function AdminDataTable<
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(pageSizeOptions[1] ?? pageSizeOptions[0] ?? 10);
+  const [pageSize, setPageSize] = useState(
+    pageSizeOptions[1] ?? pageSizeOptions[0] ?? 10,
+  );
+  const [sortState, setSortState] = useState<SortState<TColumnKey>>(null);
   const [columnVisibility, setColumnVisibility] =
     useState<Record<TColumnKey, boolean>>(initialColumnVisibility);
 
@@ -149,6 +214,26 @@ export function AdminDataTable<
       return matchesSearch && matchesFilters;
     });
   }, [filterValues, filters, items, query, searchPredicate]);
+  const sortedItems = useMemo(() => {
+    if (!sortState) {
+      return filteredItems;
+    }
+
+    const sortColumn = columns.find((column) => column.key === sortState.key);
+
+    if (!sortColumn) {
+      return filteredItems;
+    }
+
+    return [...filteredItems].sort((left, right) => {
+      const result = compareSortValues(
+        getItemSortValue(left, sortColumn),
+        getItemSortValue(right, sortColumn),
+      );
+
+      return sortState.direction === "asc" ? result : -result;
+    });
+  }, [columns, filteredItems, sortState]);
 
   const activeFilterCount = filters.filter((filter) => {
     const value = filterValues[filter.key] ?? filter.defaultValue;
@@ -162,15 +247,15 @@ export function AdminDataTable<
     (column) =>
       columnVisibility[column.key] === initialColumnVisibility[column.key],
   );
-  const totalPages = Math.max(Math.ceil(filteredItems.length / pageSize), 1);
+  const totalPages = Math.max(Math.ceil(sortedItems.length / pageSize), 1);
   const visiblePage = Math.min(currentPage, totalPages);
   const pageStartIndex = (visiblePage - 1) * pageSize;
-  const paginatedItems = filteredItems.slice(
+  const paginatedItems = sortedItems.slice(
     pageStartIndex,
     pageStartIndex + pageSize,
   );
-  const resultStart = filteredItems.length === 0 ? 0 : pageStartIndex + 1;
-  const resultEnd = Math.min(pageStartIndex + pageSize, filteredItems.length);
+  const resultStart = sortedItems.length === 0 ? 0 : pageStartIndex + 1;
+  const resultEnd = Math.min(pageStartIndex + pageSize, sortedItems.length);
   const paginationItems = getPaginationItems(totalPages, visiblePage);
 
   function updateFilter(key: TFilterKey, value: string) {
@@ -208,6 +293,25 @@ export function AdminDataTable<
   function closeSearch() {
     setQuery("");
     setIsSearchOpen(false);
+    setCurrentPage(1);
+  }
+
+  function toggleSort(column: AdminDataTableColumn<TColumnKey>) {
+    if (!column.sortable) {
+      return;
+    }
+
+    setSortState((current) => {
+      if (current?.key !== column.key) {
+        return { key: column.key, direction: "asc" };
+      }
+
+      if (current.direction === "asc") {
+        return { key: column.key, direction: "desc" };
+      }
+
+      return null;
+    });
     setCurrentPage(1);
   }
 
@@ -349,14 +453,43 @@ export function AdminDataTable<
               {columns.map((column) =>
                 columnVisibility[column.key] ? (
                   <TableHead key={column.key} className={column.className}>
-                    {column.label}
+                    {column.sortable ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Sort by ${column.label}`}
+                        aria-sort={
+                          sortState?.key === column.key
+                            ? sortState.direction === "asc"
+                              ? "ascending"
+                              : "descending"
+                            : "none"
+                        }
+                        onClick={() => toggleSort(column)}
+                        className="-mx-2 h-8 px-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        {column.label}
+                        {sortState?.key === column.key ? (
+                          sortState.direction === "asc" ? (
+                            <ArrowUp className="size-3.5" />
+                          ) : (
+                            <ArrowDown className="size-3.5" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 opacity-50" />
+                        )}
+                      </Button>
+                    ) : (
+                      column.label
+                    )}
                   </TableHead>
                 ) : null,
               )}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredItems.length === 0 ? (
+            {sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={visibleColumnCount}
@@ -376,11 +509,11 @@ export function AdminDataTable<
         </Table>
       </div>
 
-      {filteredItems.length > 0 ? (
+      {sortedItems.length > 0 ? (
         <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-1 rounded-full bg-muted/40 p-1">
             <p className="text-muted-foreground px-2 text-xs">
-              {resultStart}-{resultEnd} of {filteredItems.length}
+              {resultStart}-{resultEnd} of {sortedItems.length}
             </p>
             <div className="flex items-center gap-1">
               <span className="text-muted-foreground text-xs">Show</span>
