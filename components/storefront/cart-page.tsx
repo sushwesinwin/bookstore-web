@@ -318,8 +318,8 @@ export function CartPage() {
                     {formatCurrency(total)}
                   </span>
                 </div>
-                <Button type="button" className="mt-4 h-11 w-full lg:mt-5">
-                  Go to checkout
+                <Button asChild className="mt-4 h-11 w-full lg:mt-5">
+                  <Link href="/checkout">Go to checkout</Link>
                 </Button>
                 {errorMessage ? (
                   <p className="mt-3 text-sm font-medium text-red-600">
