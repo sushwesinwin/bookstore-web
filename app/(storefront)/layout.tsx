@@ -3,6 +3,7 @@ import { Heart } from "lucide-react";
 
 import { CartNavButton } from "@/components/storefront/cart-nav-button";
 import { StorefrontMobileMenu } from "@/components/storefront/storefront-mobile-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 export default function StorefrontLayout({
@@ -44,6 +45,7 @@ export default function StorefrontLayout({
           </div>
 
           <div className="flex justify-end gap-2">
+            <ThemeToggle />
             <Button
               asChild
               variant="outline"
