@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  type KeyboardEvent,
-  type MouseEvent,
   useState,
   useTransition,
 } from "react";
@@ -34,7 +32,7 @@ type CategoriesTableProps = {
   categories: Category[];
 };
 
-type CategoryTableColumn = "name" | "status" | "updated" | "actions";
+type CategoryTableColumn = "name" | "status" | "updated";
 type CategoryFilterKey = "status";
 type CategoryColumnVisibility = Record<CategoryTableColumn, boolean>;
 
@@ -47,19 +45,12 @@ const tableColumns: Array<AdminDataTableColumn<CategoryTableColumn>> = [
     sortable: true,
     sortValue: (item) => (item as Category).updatedAt,
   },
-  {
-    key: "actions",
-    label: "Actions",
-    className: "w-28 text-right",
-    required: true,
-  },
 ];
 
 const defaultColumnVisibility: CategoryColumnVisibility = {
   name: true,
   status: true,
   updated: true,
-  actions: true,
 };
 
 const filters: Array<AdminDataTableFilter<Category, CategoryFilterKey>> = [
@@ -142,10 +133,6 @@ function CategoryRow({
     });
   }
 
-  function stopRowEvent(event: MouseEvent | KeyboardEvent) {
-    event.stopPropagation();
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <TableRow
@@ -174,39 +161,6 @@ function CategoryRow({
         {visibleColumns.updated ? (
           <TableCell className="text-muted-foreground">
             {formatDate(category.updatedAt)}
-          </TableCell>
-        ) : null}
-        {visibleColumns.actions ? (
-          <TableCell
-            className="text-right"
-            onClick={stopRowEvent}
-            onKeyDown={stopRowEvent}
-          >
-            <div className="flex justify-end gap-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={`Edit ${category.name}`}
-                onClick={() => {
-                  setMode("edit");
-                  setIsOpen(true);
-                }}
-              >
-                <Pencil />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={`Delete ${category.name}`}
-                className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                disabled={isPending}
-                onClick={() => setIsDeleteOpen(true)}
-              >
-                <Trash2 />
-              </Button>
-            </div>
           </TableCell>
         ) : null}
       </TableRow>
@@ -270,8 +224,22 @@ function CategoryRow({
             </div>
 
             <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
-                Cancel
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setMode("edit");
+                }}
+              >
+                <Pencil />
+                Edit category
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                <Trash2 />
+                Delete category
               </Button>
             </div>
           </>

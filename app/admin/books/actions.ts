@@ -19,7 +19,7 @@ function optionalString(value: FormDataEntryValue | null) {
 
 async function parseBookForm(formData: FormData): Promise<CreateBookInput> {
   const title = optionalString(formData.get("title"));
-  const author = optionalString(formData.get("author"));
+  const author = optionalString(formData.get("author")) ?? "Unknown";
   const price = Number(formData.get("price"));
   const stock = Number(formData.get("stock") ?? 0);
   const isBestSeller = formData.get("isBestSeller") === "true";
@@ -29,8 +29,8 @@ async function parseBookForm(formData: FormData): Promise<CreateBookInput> {
       ? await uploadBookImage(image)
       : undefined;
 
-  if (!title || !author || Number.isNaN(price)) {
-    throw new Error("Title, author, and price are required.");
+  if (!title || Number.isNaN(price)) {
+    throw new Error("Title and price are required.");
   }
 
   return {

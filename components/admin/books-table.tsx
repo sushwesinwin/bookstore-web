@@ -23,7 +23,6 @@ type BookFilterKey = "category" | "stock" | "type";
 const tableColumns: Array<AdminDataTableColumn<BookTableColumn>> = [
   { key: "cover", label: "Cover", className: "w-16" },
   { key: "title", label: "Title", required: true, sortable: true },
-  { key: "author", label: "Author", sortable: true },
   {
     key: "category",
     label: "Category",
@@ -62,24 +61,16 @@ const tableColumns: Array<AdminDataTableColumn<BookTableColumn>> = [
     sortable: true,
     sortValue: (item) => (item as Book).updatedAt,
   },
-  {
-    key: "actions",
-    label: "Actions",
-    className: "w-28 text-right",
-    required: true,
-  },
 ];
 
 const defaultColumnVisibility: BookTableColumnVisibility = {
   cover: true,
   title: true,
-  author: true,
   category: true,
   status: true,
   price: true,
   stock: true,
   updated: true,
-  actions: true,
 };
 
 export function BooksTable({ books, categories }: BooksTableProps) {
@@ -146,7 +137,7 @@ export function BooksTable({ books, categories }: BooksTableProps) {
         )}
         searchPlaceholder="Search books"
         searchPredicate={(book, query) =>
-          [book.title, book.author, book.description, book.category?.name]
+          [book.title, book.description, book.category?.name]
             .filter(Boolean)
             .some((value) => value?.toLowerCase().includes(query))
         }

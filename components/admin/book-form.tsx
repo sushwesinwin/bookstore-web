@@ -76,15 +76,11 @@ export function BookForm({
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="author">Author</Label>
-            <Input
-              id="author"
-              name="author"
-              defaultValue={book?.author}
-              required
-            />
-          </div>
+          <input
+            type="hidden"
+            name="author"
+            value={book?.author ?? "Unknown"}
+          />
 
           <div className="grid gap-2">
             <Label htmlFor={categoryInputId}>Category</Label>
