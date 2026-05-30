@@ -64,9 +64,9 @@ export function AdminShell({ active, children }: AdminShellProps) {
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors hover:bg-gray-200 hover:text-foreground",
+                    "flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors hover:bg-neutral-300 hover:text-foreground dark:hover:bg-white/10",
                     isActive
-                      ? "bg-gray-200 text-foreground"
+                      ? "bg-neutral-300 text-foreground dark:bg-white/10"
                       : "text-muted-foreground",
                   )}
                 >
